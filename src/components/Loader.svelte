@@ -1,5 +1,5 @@
 <script>
-    import { Spinner } from 'flowbite-svelte';
+    import { Spinner } from 'flowbite-svelte'
   </script>
 
 <div class="absolute-container">
