@@ -234,7 +234,7 @@
   <main id="app">
     <Header />
   
-    <Tabs tabStyle="underline" contentClass="p-0">
+    <Tabs class="text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700" tabStyle="underline" contentClass="p-0">
       <TabItem open title="OP01" on:click={() => setActiveTab("OP01")} />
       <TabItem title="OP02" on:click={() => setActiveTab("OP02")} />
       <TabItem title="OP03" on:click={() => setActiveTab("OP03")} />
@@ -249,7 +249,7 @@
       <Loader />
     {/if}
   
-    <div class="flex gap-4 m-4">
+    <div class="flex gap-4 p-4 text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700">
       <Checkbox checked={showOnlyMissingCards} on:click={() => setMissingCards(!showOnlyMissingCards)} class="text-color-100">Cartes manquantes</Checkbox>
       <Checkbox checked={showSP} on:click={() => setShowSp(!showSP)} class="text-color-100">SP</Checkbox>
       <Checkbox checked={showManga} on:click={() => setShowManga(!showManga)} class="text-color-100">Manga</Checkbox>
