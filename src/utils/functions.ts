@@ -1,5 +1,5 @@
 import type { Product, Products, TotatPrices } from "../types/product.type";
-import { SITE_OP01, SITE_OP02, SITE_OP03, SITE_OP04, SITE_OP05, SITE_OP06, SITE_OP07, SITE_OP08 } from "./constants";
+import { SITE_OP01, SITE_OP02, SITE_OP03, SITE_OP04, SITE_OP05, SITE_OP06, SITE_OP07, SITE_OP08, SITE_PRB01 } from "./constants";
 import { missingOP01, missingOP02, missingOP03, missingOP04, missingOP05, missingOP06, missingOP07, missingOP08 } from "./missingCards"
 
 export function extractRarity(str: string) {
@@ -76,6 +76,8 @@ export function extractCode(str: string) {
             return SITE_OP07
             case "OP08":
             return SITE_OP08
+            case "PRB01": 
+            return SITE_PRB01
         default:
             return SITE_OP01
     }

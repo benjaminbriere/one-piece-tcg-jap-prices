@@ -32,8 +32,9 @@
     let listOP06: Products = [];
     let listOP07: Products = [];
     let listOP08: Products = [];
+    let listPRB01: Products = [];
   
-    const extensionsList = ["OP01", "OP02", "OP03", "OP04", "OP05", "OP06", "OP07", "OP08"];
+    const extensionsList = ["OP01", "OP02", "OP03", "OP04", "OP05", "OP06", "OP07", "OP08", "PRB01"];
   
     async function searchProducts() {
       displayLoader = true;
@@ -114,6 +115,9 @@
           case "OP08":
             listOP08 = arrayResults;
             break;
+          case "PRB01":
+            listPRB01 = arrayResults;
+            break;
           default:
             break;
         }
@@ -189,6 +193,11 @@
           missingProducts = missingCardsList("OP08")
           activeExtensionProducts = filterResult(listOP08);
           break;
+        case "PRB01":
+          activeList = listPRB01
+          missingProducts = missingCardsList("PRB01")
+          activeExtensionProducts = filterResult(listPRB01);
+          break;
         default:
           break;
       }
@@ -243,6 +252,7 @@
       <TabItem title="OP06" on:click={() => setActiveTab("OP06")} />
       <TabItem title="OP07" on:click={() => setActiveTab("OP07")} />
       <TabItem title="OP08" on:click={() => setActiveTab("OP08")} />
+      <TabItem title="PRB01" on:click={() => setActiveTab("PRB01")} />
     </Tabs>
   
     {#if displayLoader}
