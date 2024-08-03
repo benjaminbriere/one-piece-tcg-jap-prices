@@ -1,9 +1,10 @@
-import type { Product, Products, TotatPrices } from "../types/product.type";
+
+import type { Product, Products, TotatPrices } from "$lib/types/product.type";
 import { SITE_OP01, SITE_OP02, SITE_OP03, SITE_OP04, SITE_OP05, SITE_OP06, SITE_OP07, SITE_OP08, SITE_PRB01 } from "./constants";
 import { missingOP01, missingOP02, missingOP03, missingOP04, missingOP05, missingOP06, missingOP07, missingOP08 } from "./missingCards"
 
 export function extractRarity(str: string) {
-    let matches = str.match(/【([^】]+)】/g);
+    const matches = str.match(/【([^】]+)】/g);
     if (matches) {
       return matches.map(match => match.slice(1, -1))[0]; // Supprimer les crochets
     }
@@ -11,7 +12,7 @@ export function extractRarity(str: string) {
   }
   
 export function extractCode(str: string) {
-    let matches = str.match(/{([^}]+)}/g);
+    const matches = str.match(/{([^}]+)}/g);
     if (matches) {
       return matches.map(match => match.slice(1, -1))[0]; // Supprimer les accolades
     }
@@ -20,8 +21,8 @@ export function extractCode(str: string) {
   
   export function extractImageInfo(imgTag: string) {
     // Extraire l'URL de l'image
-    let srcMatch = imgTag.match(/src="([^"]+)"/);
-    let src = srcMatch ? srcMatch[1] : "";
+    const srcMatch = imgTag.match(/src="([^"]+)"/);
+    const src = srcMatch ? srcMatch[1] : "";
   
     return src
   }
@@ -40,7 +41,7 @@ export function extractCode(str: string) {
   }
 
   export function extractState(str: string) {
-    let matches = str.match(/〔([^〕]+)〕/g);
+    const matches = str.match(/〔([^〕]+)〕/g);
     const state = matches?.[0].slice(1, -1) ?? ""
     if(state === "PSA10鑑定済")
       return "PSA10"

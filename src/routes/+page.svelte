@@ -1,11 +1,13 @@
 <script lang="ts">
     import Header from "../components/Header.svelte";
     import scrapeIt from "scrape-it";
-    import type { MissingCard, Product, Products, TotatPrices } from "../types/product.type";
-    import { Table, TableHead, TableHeadCell, TableBody, TableBodyRow, TableBodyCell, Tabs, TabItem, Checkbox } from "flowbite-svelte";
-    import { TAX_PRICE, YEN_PRICE } from "../utils/constants";
-    import { extractImageInfo, extractRarity, extractCode, extractState, webURL, missingCardsList, totalPricesCalc } from "../utils/functions";
+    import type { MissingCard, Product, Products, TotatPrices } from "$lib/types/product.type";
+    import { Table, TableHead, TableHeadCell, TableBody, TableBodyRow, TableBodyCell, Tabs, TabItem, Checkbox, Button } from "flowbite-svelte";
+    import { TAX_PRICE, YEN_PRICE } from "$lib/utils/constants";
+    import { extractImageInfo, extractRarity, extractCode, extractState, webURL, missingCardsList, totalPricesCalc } from "../lib/utils/functions";
     import Loader from "../components/Loader.svelte";
+	import { onMount } from "svelte";
+	import type { AddCardsRequest } from "$lib/types/api.type";
     
     let activeExtensionProducts: Products = [];
     let missingProducts: MissingCard[] = [];
@@ -35,6 +37,111 @@
     let listPRB01: Products = [];
   
     const extensionsList = ["OP01", "OP02", "OP03", "OP04", "OP05", "OP06", "OP07", "OP08", "PRB01"];
+    let error = null;
+
+    const extentionsToUpdate = [listOP01, listOP02, listOP03, listOP04, listOP05, listOP06, listOP07, listOP08, listPRB01]
+
+    async function loadData() {
+
+      extensionsList.forEach(async extension => {
+        try {
+        const response = await fetch(`/api/card/getByExtension?extension=${extension}`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const result = await response.json();
+
+        switch (extension) {
+          case "OP01":
+            listOP01 = result;
+            if(activeTab === extension){
+              activeExtensionProducts = listOP01;
+              missingProducts = missingCardsList("OP01")
+              activeList = filterResult(result);
+              calculateTotalPrices()
+            }
+            break;
+          case "OP02":
+            listOP02 = result;
+            if(activeTab === extension){
+              activeExtensionProducts = listOP02;
+              missingProducts = missingCardsList("OP02")
+              activeList = filterResult(result);
+              calculateTotalPrices()
+            }
+            break;
+          case "OP03":
+            listOP03 = result;
+            if(activeTab === extension){
+              activeExtensionProducts = listOP03;
+              missingProducts = missingCardsList("OP03")
+              activeList = filterResult(result);
+              calculateTotalPrices()
+            }
+            break;
+          case "OP04":
+            listOP04 = result;
+            if(activeTab === extension){
+              activeExtensionProducts = listOP04;
+              missingProducts = missingCardsList("OP04")
+              activeList = filterResult(result);
+              calculateTotalPrices()
+            }
+            break;
+          case "OP05":
+            listOP05 = result;
+            if(activeTab === extension){
+              activeExtensionProducts = listOP05;
+              missingProducts = missingCardsList("OP05")
+              activeList = filterResult(result);
+              calculateTotalPrices()
+            }
+            break;
+          case "OP06":
+            listOP06 = result;
+            if(activeTab === extension){
+              activeExtensionProducts = listOP06;
+              missingProducts = missingCardsList("OP06")
+              activeList = filterResult(result);
+              calculateTotalPrices()
+            }
+            break;
+          case "OP07":
+            listOP07 = result;
+            if(activeTab === extension){
+              activeExtensionProducts = listOP07;
+              missingProducts = missingCardsList("OP07")
+              activeList = filterResult(result);
+              calculateTotalPrices()
+            }
+            break;
+          case "OP08":
+            listOP08 = result;
+            if(activeTab === extension){
+              activeExtensionProducts = listOP08;
+              missingProducts = missingCardsList("OP08")
+              activeList = filterResult(result);
+              calculateTotalPrices()
+            }
+            break;
+          case "PRB01":
+            listPRB01 = result;
+            if(activeTab === extension){
+              activeExtensionProducts = listPRB01;
+              missingProducts = missingCardsList("PRB01")
+              activeList = filterResult(result);
+              calculateTotalPrices()
+            }
+            break;
+          default:
+            break;
+        }
+      } catch (err: any) {
+        error = err.message;
+      } 
+      })
+      displayLoader = false;
+    }
   
     async function searchProducts() {
       displayLoader = true;
@@ -82,6 +189,8 @@
             rarity: extractRarity(product.name),
             code: extractCode(product.name),
             state: extractState(product.name),
+            isMissingInCollection: true,
+            extension: extension
           };
         });
   
@@ -124,10 +233,6 @@
       }
   
       displayLoader = false;
-      activeExtensionProducts = listOP01;
-      missingProducts = missingCardsList("OP01")
-      activeList = listOP01;
-      calculateTotalPrices()
     }
   
     function filterResult(list: Products){
@@ -142,10 +247,7 @@
         filteredList = filteredList.filter(p => p.rarity !== "SP")
       }
       if(showOnlyMissingCards){
-        console.log(filteredList)
-        console.log(missingProducts)
         filteredList = filteredList.filter(p => missingProducts.find(m => m.name === p.code))
-        console.log(filteredList)
       }
       return filteredList
     }
@@ -235,9 +337,39 @@
       activeExtensionProducts = filterResult(activeList)
       calculateTotalPrices();
     }
-  
-  
-    searchProducts();
+
+    async function addCards() {
+      await searchProducts()
+
+      extentionsToUpdate.forEach(async extension => {
+        try {
+        const response = await fetch('/api/card/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(extension),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Data added:', data);
+        } else {
+          const error = await response.json();
+          console.error('Error adding data:', error.message);
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+      }
+      })
+    }
+
+    onMount(() => {
+      console.log("here !!!")
+      loadData()
+      console.log()
+    })
+
   </script>
   
   <main id="app">
@@ -264,6 +396,7 @@
       <Checkbox checked={showSP} on:click={() => setShowSp(!showSP)} class="text-color-100">SP</Checkbox>
       <Checkbox checked={showManga} on:click={() => setShowManga(!showManga)} class="text-color-100">Manga</Checkbox>
       <Checkbox checked={showPSA10} on:click={() => setShowPSA10(!showPSA10)} class="text-color-100">PSA 10</Checkbox>
+      <Button on:click={() =>addCards()}>Mettre à jour les prix</Button>
     </div>
   
     <Table>
