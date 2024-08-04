@@ -1,10 +1,12 @@
 <script lang="ts">
 	import Header from '../components/Header.svelte';
 	import scrapeIt from 'scrape-it';
-	import type { MissingCard, Product, Products, TotatPrices } from '$lib/types/product.type';
+	import type { Product, Products, TotatPrices } from '$lib/types/product.type';
 	import {
 		Button,
 		Checkbox,
+		Label,
+		Select,
 		TabItem,
 		Table,
 		TableBody,
@@ -16,18 +18,19 @@
 	} from 'flowbite-svelte';
 	import { TAX_PRICE } from '$lib/utils/constants';
 	import {
+		convertExtensionToConfigurationKey,
 		extractCode,
 		extractImageInfo,
 		extractRarity,
 		extractState,
-		missingCardsList,
+		isCardMissing,
 		webURL
 	} from '$lib/utils/functions';
 	import Loader from '../components/Loader.svelte';
 	import { onMount } from 'svelte';
+	import type { Configuration, Configurations } from '$lib/types/api.type';
 
 	let activeExtensionProducts: Products = [];
-	let missingProducts: MissingCard[] = [];
 	let activeTab = 'OP01';
 	const onlyAGrade = true;
 	let displayLoader = true;
@@ -36,7 +39,7 @@
 		euroTotal: 0,
 		yenTotal: 0
 	};
-	let yenPriceInEuro = 0
+	let yenPriceInEuro = 0;
 
 	let showOnlyMissingCards = false;
 	let showSP = true;
@@ -55,6 +58,12 @@
 	let listPRB01: Products = [];
 
 	const extensionsList = ['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'PRB01'];
+
+	let configurations: Configurations = [];
+	let activeConfiguration: Configuration | undefined;
+	let activeConfigurationId: string;
+
+	$: activeConfiguration = configurations.find((config) => config.id === activeConfigurationId);
 
 	let extensionsMap = new Map<string, Products>([
 		['OP01', listOP01],
@@ -82,7 +91,6 @@
 						listOP01 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP01;
-							missingProducts = missingCardsList('OP01');
 							activeList = filterResult(result);
 							calculateTotalPrices();
 						}
@@ -91,7 +99,6 @@
 						listOP02 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP02;
-							missingProducts = missingCardsList('OP02');
 							activeList = filterResult(result);
 							calculateTotalPrices();
 						}
@@ -100,7 +107,6 @@
 						listOP03 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP03;
-							missingProducts = missingCardsList('OP03');
 							activeList = filterResult(result);
 							calculateTotalPrices();
 						}
@@ -109,7 +115,6 @@
 						listOP04 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP04;
-							missingProducts = missingCardsList('OP04');
 							activeList = filterResult(result);
 							calculateTotalPrices();
 						}
@@ -118,7 +123,6 @@
 						listOP05 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP05;
-							missingProducts = missingCardsList('OP05');
 							activeList = filterResult(result);
 							calculateTotalPrices();
 						}
@@ -127,7 +131,6 @@
 						listOP06 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP06;
-							missingProducts = missingCardsList('OP06');
 							activeList = filterResult(result);
 							calculateTotalPrices();
 						}
@@ -136,7 +139,6 @@
 						listOP07 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP07;
-							missingProducts = missingCardsList('OP07');
 							activeList = filterResult(result);
 							calculateTotalPrices();
 						}
@@ -145,7 +147,6 @@
 						listOP08 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP08;
-							missingProducts = missingCardsList('OP08');
 							activeList = filterResult(result);
 							calculateTotalPrices();
 						}
@@ -154,7 +155,6 @@
 						listPRB01 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listPRB01;
-							missingProducts = missingCardsList('PRB01');
 							activeList = filterResult(result);
 							calculateTotalPrices();
 						}
@@ -169,22 +169,41 @@
 		displayLoader = false;
 	}
 
+	async function loadConfiguration() {
+		try {
+			const response = await fetch(`/api/configuration/getAll`);
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+			const result = await response.json();
+
+			configurations = result;
+			activeConfiguration = result[0] ?? undefined;
+			console.log(activeConfiguration);
+			activeConfigurationId = result[0].id ?? '';
+			console.log(activeConfigurationId);
+
+			console.log(configurations);
+		} catch (err: any) {
+			console.debug(err.message);
+		}
+	}
+
 	async function searchProducts() {
 		displayLoader = true;
-		console.log(yenPriceInEuro)
 		// eslint-disable-next-line no-control-regex
 		const regex = new RegExp('\n', 'g');
 		const yenRegex = new RegExp('円', 'g');
 
-		listOP01 = []
-		listOP02 = []
-		listOP03 = []
-		listOP04 = []
-		listOP05 = []
-		listOP06 = []
-		listOP07 = []
-		listOP08 = []
-		listPRB01 = []
+		listOP01 = [];
+		listOP02 = [];
+		listOP03 = [];
+		listOP04 = [];
+		listOP05 = [];
+		listOP06 = [];
+		listOP07 = [];
+		listOP08 = [];
+		listPRB01 = [];
 
 		for (const extension of extensionsList) {
 			const webSiteUrl = webURL(extension);
@@ -297,7 +316,13 @@
 			filteredList = filteredList.filter((p) => p.rarity !== 'SP');
 		}
 		if (showOnlyMissingCards) {
-			filteredList = filteredList.filter((p) => missingProducts.find((m) => m.name === p.code));
+			if (activeConfiguration) {
+				const key = convertExtensionToConfigurationKey(activeTab);
+				if (Array.isArray(activeConfiguration[key])) {
+					const missingCardsOfActiveExtension: string[] = activeConfiguration[key] as string[];
+					filteredList = filteredList.filter((p) => missingCardsOfActiveExtension.includes(p.code));
+				}
+			}
 		}
 		return filteredList;
 	}
@@ -307,47 +332,38 @@
 		switch (newTab) {
 			case 'OP01':
 				activeList = listOP01;
-				missingProducts = missingCardsList('OP01');
 				activeExtensionProducts = filterResult(listOP01);
 				break;
 			case 'OP02':
 				activeList = listOP02;
-				missingProducts = missingCardsList('OP02');
 				activeExtensionProducts = filterResult(listOP02);
 				break;
 			case 'OP03':
 				activeList = listOP03;
-				missingProducts = missingCardsList('OP03');
 				activeExtensionProducts = filterResult(listOP03);
 				break;
 			case 'OP04':
 				activeList = listOP04;
-				missingProducts = missingCardsList('OP04');
 				activeExtensionProducts = filterResult(listOP04);
 				break;
 			case 'OP05':
 				activeList = listOP05;
-				missingProducts = missingCardsList('OP05');
 				activeExtensionProducts = filterResult(listOP05);
 				break;
 			case 'OP06':
 				activeList = listOP06;
-				missingProducts = missingCardsList('OP06');
 				activeExtensionProducts = filterResult(listOP06);
 				break;
 			case 'OP07':
 				activeList = listOP07;
-				missingProducts = missingCardsList('OP07');
 				activeExtensionProducts = filterResult(listOP07);
 				break;
 			case 'OP08':
 				activeList = listOP08;
-				missingProducts = missingCardsList('OP08');
 				activeExtensionProducts = filterResult(listOP08);
 				break;
 			case 'PRB01':
 				activeList = listPRB01;
-				missingProducts = missingCardsList('PRB01');
 				activeExtensionProducts = filterResult(listPRB01);
 				break;
 			default:
@@ -397,6 +413,8 @@
 	async function addCards() {
 		await searchProducts();
 
+		yenPriceInEuro = await (await fetch('api/utils/yenRate')).json();
+
 		extensionsMap.forEach(async (extension) => {
 			try {
 				const response = await fetch('/api/card/add', {
@@ -421,9 +439,66 @@
 		loadData();
 	}
 
+	function handleMissingCardCheckboxChange(
+		event: Event,
+		code: string,
+		extension: keyof Configuration
+	) {
+		const target = event.target as HTMLInputElement;
+		const value = target.checked;
+
+		console.log(value);
+
+		if (activeConfiguration) {
+			if (Array.isArray(activeConfiguration[extension])) {
+				const updatedCodes = new Set(activeConfiguration[extension]);
+
+				console.log();
+
+				if (value) {
+					updatedCodes.add(code);
+				} else {
+					updatedCodes.delete(code);
+				}
+
+				console.log(updatedCodes);
+
+				activeConfiguration = {
+					...activeConfiguration,
+					[extension]: Array.from(updatedCodes)
+				};
+			}
+		}
+
+		console.log(activeConfiguration);
+	}
+
+	async function saveConfiguration() {
+		try {
+			const response = await fetch('/api/configuration/updateOne', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(activeConfiguration)
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				console.debug('Data added:', data);
+			} else {
+				const error = await response.json();
+				console.error('Error adding data:', error.message);
+			}
+		} catch (err) {
+			console.error('Fetch error:', err);
+		}
+	}
+
+	loadConfiguration();
+
 	onMount(async () => {
-		loadData();
-		yenPriceInEuro = await (await fetch('api/utils/yenRate')).json()
+		await loadData();
 	});
 </script>
 
@@ -450,7 +525,9 @@
 		<Loader />
 	{/if}
 
-	<div class="flex gap-4 bg-gray-100 p-4 text-gray-500 dark:bg-gray-700 dark:text-gray-400 flex flex-wrap">
+	<div
+		class="flex flex-wrap gap-4 bg-gray-100 p-4 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+	>
 		<Checkbox
 			checked={showOnlyMissingCards}
 			on:click={() => setMissingCards(!showOnlyMissingCards)}
@@ -468,7 +545,21 @@
 			PSA 10
 		</Checkbox>
 		<Button on:click={() => addCards()}>Mettre à jour les prix</Button>
+		<Button on:click={() => saveConfiguration()}>Enregistrer liste cartes manquantes</Button>
 	</div>
+
+	{#if configurations.length > 0 && activeConfigurationId}
+		<div class="p-4">
+			<Label>
+				Choisir une configuration
+				<Select class="mt-2" bind:value={activeConfigurationId} placeholder="Configuration">
+					{#each configurations as { id, name }}
+						<option value={id}>{name}</option>
+					{/each}
+				</Select>
+			</Label>
+		</div>
+	{/if}
 
 	<Table>
 		<TableHead>
@@ -505,7 +596,21 @@
 			{#if activeExtensionProducts}
 				{#each activeExtensionProducts as item}
 					<TableBodyRow>
-						<TableBodyCell><Checkbox /></TableBodyCell>
+						<TableBodyCell>
+							<Checkbox
+								checked={isCardMissing(
+									convertExtensionToConfigurationKey(activeTab),
+									item.code,
+									activeConfiguration
+								)}
+								on:change={(event) =>
+									handleMissingCardCheckboxChange(
+										event,
+										item.code,
+										convertExtensionToConfigurationKey(activeTab)
+									)}
+							/>
+						</TableBodyCell>
 						<TableBodyCell><img src={item.url} alt={item.name} /></TableBodyCell>
 						<TableBodyCell>{item.code}</TableBodyCell>
 						<TableBodyCell>{item.rarity}</TableBodyCell>
@@ -521,7 +626,7 @@
 </main>
 
 <style>
-    main {
-        width: 100%;
-    }
+	main {
+		width: 100%;
+	}
 </style>
