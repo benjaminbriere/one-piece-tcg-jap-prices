@@ -68,7 +68,7 @@
 	];
 
 	async function loadData() {
-		extensionsList.forEach(async (extension) => {
+		for (const extension of extensionsList) {
 			try {
 				const response = await fetch(`/api/card/getByExtension?extension=${extension}`);
 				if (!response.ok) {
@@ -164,12 +164,13 @@
 			} catch (err: any) {
 				console.debug(err.message);
 			}
-		});
+		}
 		displayLoader = false;
 	}
 
 	async function searchProducts() {
 		displayLoader = true;
+		// eslint-disable-next-line no-control-regex
 		const regex = new RegExp('\n', 'g');
 		const yenRegex = new RegExp('円', 'g');
 
@@ -431,17 +432,18 @@
 			checked={showOnlyMissingCards}
 			on:click={() => setMissingCards(!showOnlyMissingCards)}
 			class="text-color-100"
-			>Cartes manquantes
+		>
+			Cartes manquantes
 		</Checkbox>
-		<Checkbox checked={showSP} on:click={() => setShowSp(!showSP)} class="text-color-100"
-			>SP</Checkbox
-		>
-		<Checkbox checked={showManga} on:click={() => setShowManga(!showManga)} class="text-color-100"
-			>Manga</Checkbox
-		>
-		<Checkbox checked={showPSA10} on:click={() => setShowPSA10(!showPSA10)} class="text-color-100"
-			>PSA 10</Checkbox
-		>
+		<Checkbox checked={showSP} on:click={() => setShowSp(!showSP)} class="text-color-100">
+			SP
+		</Checkbox>
+		<Checkbox checked={showManga} on:click={() => setShowManga(!showManga)} class="text-color-100">
+			Manga
+		</Checkbox>
+		<Checkbox checked={showPSA10} on:click={() => setShowPSA10(!showPSA10)} class="text-color-100">
+			PSA 10
+		</Checkbox>
 		<Button on:click={() => addCards()}>Mettre à jour les prix</Button>
 	</div>
 
@@ -485,7 +487,7 @@
 </main>
 
 <style>
-	main {
-		width: 100%;
-	}
+    main {
+        width: 100%;
+    }
 </style>
