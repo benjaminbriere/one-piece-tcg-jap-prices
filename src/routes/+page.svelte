@@ -450,7 +450,7 @@
 		<Loader />
 	{/if}
 
-	<div class="flex gap-4 bg-gray-100 p-4 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+	<div class="flex gap-4 bg-gray-100 p-4 text-gray-500 dark:bg-gray-700 dark:text-gray-400 flex flex-wrap">
 		<Checkbox
 			checked={showOnlyMissingCards}
 			on:click={() => setMissingCards(!showOnlyMissingCards)}
@@ -472,36 +472,47 @@
 
 	<Table>
 		<TableHead>
-			<TableHeadCell>Code</TableHeadCell>
-			<TableHeadCell>Rareté</TableHeadCell>
-			<TableHeadCell>Etat</TableHeadCell>
+			<TableHeadCell>TOTAL</TableHeadCell>
 			<TableHeadCell>Prix Yen</TableHeadCell>
 			<TableHeadCell>Prix EURO (HT)</TableHeadCell>
 			<TableHeadCell>Prix EURO (TTC)</TableHeadCell>
-			<TableHeadCell>Photo</TableHeadCell>
 		</TableHead>
 		<TableBody tableBodyClass="divide-y">
 			{#if activeExtensionProducts}
 				{#if totalPrices}
 					<TableBodyRow>
 						<TableBodyCell>TOTAL</TableBodyCell>
-						<TableBodyCell></TableBodyCell>
-						<TableBodyCell></TableBodyCell>
 						<TableBodyCell>{totalPrices.yenTotal ?? 0} ¥</TableBodyCell>
 						<TableBodyCell>{totalPrices.euroTotal ?? 0} €</TableBodyCell>
 						<TableBodyCell>{totalPrices.euroTaxesTotal ?? 0} €</TableBodyCell>
-						<TableBodyCell></TableBodyCell>
 					</TableBodyRow>
 				{/if}
+			{/if}
+		</TableBody>
+	</Table>
+	<Table>
+		<TableHead>
+			<TableHeadCell>Manquante</TableHeadCell>
+			<TableHeadCell></TableHeadCell>
+			<TableHeadCell>Code</TableHeadCell>
+			<TableHeadCell>Rareté</TableHeadCell>
+			<TableHeadCell>Etat</TableHeadCell>
+			<TableHeadCell>Prix Yen</TableHeadCell>
+			<TableHeadCell>Prix EURO (HT)</TableHeadCell>
+			<TableHeadCell>Prix EURO (TTC)</TableHeadCell>
+		</TableHead>
+		<TableBody tableBodyClass="divide-y">
+			{#if activeExtensionProducts}
 				{#each activeExtensionProducts as item}
 					<TableBodyRow>
+						<TableBodyCell><Checkbox /></TableBodyCell>
+						<TableBodyCell><img src={item.url} alt={item.name} /></TableBodyCell>
 						<TableBodyCell>{item.code}</TableBodyCell>
 						<TableBodyCell>{item.rarity}</TableBodyCell>
 						<TableBodyCell>{item.state}</TableBodyCell>
 						<TableBodyCell>{item.yenPrice}</TableBodyCell>
 						<TableBodyCell>{item.euroPrice} €</TableBodyCell>
 						<TableBodyCell>{item.euroTaxPrice} €</TableBodyCell>
-						<TableBodyCell><img src={item.url} alt={item.name} /></TableBodyCell>
 					</TableBodyRow>
 				{/each}
 			{/if}
