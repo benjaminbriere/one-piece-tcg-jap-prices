@@ -4,7 +4,7 @@ import type { AddCardsRequest } from '$lib/types/api.type.js'; // Assurez-vous q
 export async function POST({ request }) {
 	try {
 		const cards: AddCardsRequest = await request.json();
-
+		
 		if (
 			!Array.isArray(cards) ||
 			cards.some(

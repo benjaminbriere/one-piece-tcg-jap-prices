@@ -55,17 +55,17 @@
 
 	const extensionsList = ['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'PRB01'];
 
-	const extentionsToUpdate = [
-		listOP01,
-		listOP02,
-		listOP03,
-		listOP04,
-		listOP05,
-		listOP06,
-		listOP07,
-		listOP08,
-		listPRB01
-	];
+	let extensionsMap = new Map<string, Products>([
+		['OP01', listOP01],
+		['OP02', listOP02],
+		['OP03', listOP03],
+		['OP04', listOP04],
+		['OP05', listOP05],
+		['OP06', listOP06],
+		['OP07', listOP07],
+		['OP08', listOP08],
+		['PRB01', listPRB01]
+	]);
 
 	async function loadData() {
 		for (const extension of extensionsList) {
@@ -176,86 +176,98 @@
 
 		for (const extension of extensionsList) {
 			const webSiteUrl = webURL(extension);
+			const maxPages = 3;
 
-			const { data } = await scrapeIt(webSiteUrl, {
-				content: '.itemlist_box',
-				products: {
-					listItem: '.list_item_cell',
-					data: {
-						name: {
-							selector: '.goods_name',
-							convert: (x: string) => x.replace(regex, '')
-						},
-						yenPrice: '.selling_price > .figure',
-						link: '.item_data > a',
-						url: {
-							selector: '.global_photo',
-							how: 'html'
+			for (let i = 1; i <= maxPages; i++) {
+				const { data } = await scrapeIt(`${webSiteUrl}&page=${i}`, {
+					content: '.itemlist_box',
+					products: {
+						listItem: '.list_item_cell',
+						data: {
+							name: {
+								selector: '.goods_name',
+								convert: (x: string) => x.replace(regex, '')
+							},
+							yenPrice: '.selling_price > .figure',
+							link: '.item_data > a',
+							url: {
+								selector: '.global_photo',
+								how: 'html'
+							}
 						}
 					}
+				});
+
+				//@ts-expect-error ignore type of scrape-it
+				const res: Products = data.products;
+
+				const formattedResults = res.map((product: Product) => {
+					const yenPrice = Number(String(product.yenPrice).replace(yenRegex, '').replace(',', ''));
+					const euroPrice = Math.floor(yenPrice * YEN_PRICE * 100) / 100;
+					const euroTaxPrice = Math.floor((euroPrice + euroPrice * TAX_PRICE) * 100) / 100;
+
+					return {
+						name: product.name,
+						yenPrice: yenPrice,
+						euroPrice: euroPrice,
+						euroTaxPrice: euroTaxPrice,
+						link: product.link,
+						url: extractImageInfo(product.url),
+						rarity: extractRarity(product.name),
+						code: extractCode(product.name),
+						state: extractState(product.name),
+						isMissingInCollection: true,
+						extension: extension
+					};
+				});
+
+				const arrayResults: Product[] = formattedResults
+					.filter((p) =>
+						onlyAGrade ? p.state === 'A' || p.state === 'PSA10' : p.state !== undefined
+					)
+					.filter((p) => p.name.includes('パラレル'))
+					.sort((a, b) => a.code.localeCompare(b.code));
+
+				switch (extension) {
+					case 'OP01':
+						listOP01 = [...listOP01, ...arrayResults];
+						extensionsMap.set('OP01', listOP01);
+						break;
+					case 'OP02':
+						listOP02 = [...listOP02, ...arrayResults];
+						extensionsMap.set('OP02', listOP02);
+						break;
+					case 'OP03':
+						listOP03 = [...listOP03, ...arrayResults];
+						extensionsMap.set('OP03', listOP03);
+						break;
+					case 'OP04':
+						listOP04 = [...listOP04, ...arrayResults];
+						extensionsMap.set('OP04', listOP04);
+						break;
+					case 'OP05':
+						listOP05 = [...listOP05, ...arrayResults];
+						extensionsMap.set('OP05', listOP05);
+						break;
+					case 'OP06':
+						listOP06 = [...listOP06, ...arrayResults];
+						extensionsMap.set('OP06', listOP06);
+						break;
+					case 'OP07':
+						listOP07 = [...listOP07, ...arrayResults];
+						extensionsMap.set('OP07', listOP07);
+						break;
+					case 'OP08':
+						listOP08 = [...listOP08, ...arrayResults];
+						extensionsMap.set('OP08', listOP08);
+						break;
+					case 'PRB01':
+						listPRB01 = [...listPRB01, ...arrayResults];
+						extensionsMap.set('PRB01', listPRB01);
+						break;
+					default:
+						break;
 				}
-			});
-
-			//@ts-expect-error ignore type of scrape-it
-			const res: Products = data.products;
-
-			const formattedResults = res.map((product: Product) => {
-				const yenPrice = Number(String(product.yenPrice).replace(yenRegex, '').replace(',', ''));
-				const euroPrice = Math.floor(yenPrice * YEN_PRICE * 100) / 100;
-				const euroTaxPrice = Math.floor((euroPrice + euroPrice * TAX_PRICE) * 100) / 100;
-
-				return {
-					name: product.name,
-					yenPrice: yenPrice,
-					euroPrice: euroPrice,
-					euroTaxPrice: euroTaxPrice,
-					link: product.link,
-					url: extractImageInfo(product.url),
-					rarity: extractRarity(product.name),
-					code: extractCode(product.name),
-					state: extractState(product.name),
-					isMissingInCollection: true,
-					extension: extension
-				};
-			});
-
-			const arrayResults = formattedResults
-				.filter((p) =>
-					onlyAGrade ? p.state === 'A' || p.state === 'PSA10' : p.state !== undefined
-				)
-				.filter((p) => p.name.includes('パラレル'))
-				.sort((a, b) => a.code.localeCompare(b.code));
-
-			switch (extension) {
-				case 'OP01':
-					listOP01 = arrayResults;
-					break;
-				case 'OP02':
-					listOP02 = arrayResults;
-					break;
-				case 'OP03':
-					listOP03 = arrayResults;
-					break;
-				case 'OP04':
-					listOP04 = arrayResults;
-					break;
-				case 'OP05':
-					listOP05 = arrayResults;
-					break;
-				case 'OP06':
-					listOP06 = arrayResults;
-					break;
-				case 'OP07':
-					listOP07 = arrayResults;
-					break;
-				case 'OP08':
-					listOP08 = arrayResults;
-					break;
-				case 'PRB01':
-					listPRB01 = arrayResults;
-					break;
-				default:
-					break;
 			}
 		}
 
@@ -374,7 +386,7 @@
 	async function addCards() {
 		await searchProducts();
 
-		extentionsToUpdate.forEach(async (extension) => {
+		extensionsMap.forEach(async (extension) => {
 			try {
 				const response = await fetch('/api/card/add', {
 					method: 'POST',
@@ -386,7 +398,7 @@
 
 				if (response.ok) {
 					const data = await response.json();
-					console.log('Data added:', data);
+					console.debug('Data added:', data);
 				} else {
 					const error = await response.json();
 					console.error('Error adding data:', error.message);
@@ -398,13 +410,11 @@
 	}
 
 	onMount(() => {
-		console.log('here !!!');
 		loadData();
-		console.log();
 	});
 </script>
 
-<main id="app">
+<main id="app" class="bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
 	<Header />
 
 	<Tabs
