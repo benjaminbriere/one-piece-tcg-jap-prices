@@ -20,7 +20,7 @@ import {
 	missingOP07,
 	missingOP08
 } from './missingCards';
-
+import type { Configuration } from '$lib/types/api.type';
 
 export function extractRarity(str: string) {
 	const matches = str.match(/【([^】]+)】/g);
@@ -114,4 +114,42 @@ export function missingCardsList(value: string) {
 		default:
 			return [];
 	}
+}
+
+export function convertExtensionToConfigurationKey(value: string): keyof Configuration {
+	switch (value) {
+		case 'OP01':
+			return 'op01';
+		case 'OP02':
+			return 'op02';
+		case 'OP03':
+			return 'op03';
+		case 'OP04':
+			return 'op04';
+		case 'OP05':
+			return 'op05';
+		case 'OP06':
+			return 'op06';
+		case 'OP07':
+			return 'op07';
+		case 'OP08':
+			return 'op08';
+		case 'PRB01':
+			return 'prb01';
+		default:
+			return 'op01';
+	}
+}
+
+export function isCardMissing(
+	key: keyof Configuration,
+	value: string,
+	configuration?: Configuration
+): boolean {
+	if (configuration) {
+		if (Array.isArray(configuration[key])) {
+			return (configuration[key] as string[]).includes(value);
+		}
+	}
+	return false;
 }

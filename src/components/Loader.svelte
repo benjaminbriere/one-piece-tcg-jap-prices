@@ -6,7 +6,6 @@
 	<div class="flex flex-col justify-center">
 		<Spinner />
 	</div>
-
 </div>
 
 <style>

@@ -47,8 +47,12 @@ export async function POST({ request }) {
 			if (existingCard) {
 				// Si le code et l'état existent déjà, mettre à jour les prix
 				console.log(`Updating card with code: ${card.code}, state: ${card.state}`);
-				console.log(`Old prices - Yen: ${existingCard.yenPrice}, Euro: ${existingCard.euroPrice}, EuroTax: ${existingCard.euroTaxPrice}`);
-				console.log(`New prices - Yen: ${card.yenPrice}, Euro: ${card.euroPrice}, EuroTax: ${card.euroTaxPrice}`);
+				console.log(
+					`Old prices - Yen: ${existingCard.yenPrice}, Euro: ${existingCard.euroPrice}, EuroTax: ${existingCard.euroTaxPrice}`
+				);
+				console.log(
+					`New prices - Yen: ${card.yenPrice}, Euro: ${card.euroPrice}, EuroTax: ${card.euroTaxPrice}`
+				);
 
 				const { error: updateError } = await supabase
 					.from('cards')
@@ -70,10 +74,7 @@ export async function POST({ request }) {
 				results.push({ action: 'updated', code: card.code, state: card.state });
 			} else {
 				// Si le code et l'état n'existent pas, insérer une nouvelle carte
-				const { error: insertError } = await supabase
-					.from('cards')
-					.insert(card)
-					.select(); // Sélectionner les données insérées pour confirmation
+				const { error: insertError } = await supabase.from('cards').insert(card).select(); // Sélectionner les données insérées pour confirmation
 
 				if (insertError) {
 					console.error('Error inserting data:', insertError.message);
@@ -87,13 +88,10 @@ export async function POST({ request }) {
 			}
 		}
 
-		return new Response(
-			JSON.stringify({ message: 'Data processed successfully', results }),
-			{
-				status: 200,
-				headers: { 'Content-Type': 'application/json' }
-			}
-		);
+		return new Response(JSON.stringify({ message: 'Data processed successfully', results }), {
+			status: 200,
+			headers: { 'Content-Type': 'application/json' }
+		});
 	} catch (err) {
 		console.error('Unexpected error:', err);
 		return new Response(JSON.stringify({ message: 'Unexpected error occurred' }), {

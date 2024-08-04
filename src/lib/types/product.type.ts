@@ -14,10 +14,6 @@ export type Product = {
 
 export type Products = Product[];
 
-export type MissingCard = {
-	name: string;
-};
-
 export type TotatPrices = {
 	yenTotal: number;
 	euroTotal: number;
