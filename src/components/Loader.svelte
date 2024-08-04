@@ -2,15 +2,18 @@
 	import { Spinner } from 'flowbite-svelte';
 </script>
 
-<div class="absolute-container">
-	<Spinner />
+<div id="absolute-container">
+	<div class="flex flex-col justify-center">
+		<Spinner />
+	</div>
+
 </div>
 
 <style>
-	.absolute-container {
+	#absolute-container {
 		width: 100vw;
 		height: 100vh;
-		position: relative;
+		position: fixed;
 		top: 0;
 		left: 0;
 		z-index: 1000;

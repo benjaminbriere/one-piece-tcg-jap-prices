@@ -20,7 +20,6 @@ import {
 	missingOP07,
 	missingOP08
 } from './missingCards';
-import * as dotenv from 'dotenv';
 
 
 export function extractRarity(str: string) {
