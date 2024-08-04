@@ -20,6 +20,7 @@
 		extractImageInfo,
 		extractRarity,
 		extractState,
+		getYenPrice,
 		missingCardsList,
 		webURL
 	} from '$lib/utils/functions';
@@ -409,8 +410,10 @@
 		});
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		loadData();
+		const yenPrice = await getYenPrice();
+		console.log(yenPrice);
 	});
 </script>
 
