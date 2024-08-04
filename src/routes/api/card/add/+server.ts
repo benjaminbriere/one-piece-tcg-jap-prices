@@ -32,7 +32,9 @@ export async function POST({ request }) {
 				.from('cards')
 				.select('id, yenPrice, euroPrice, euroTaxPrice')
 				.eq('code', card.code)
+				.eq('rarity', card.rarity)
 				.eq('state', card.state)
+				.eq('parallel', card.parallel)
 				.single(); // On s'attend à une seule ligne
 
 			if (fetchError && fetchError.code !== 'PGRST116') {

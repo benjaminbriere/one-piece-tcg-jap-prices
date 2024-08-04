@@ -28,11 +28,10 @@
 	} from '$lib/utils/functions';
 	import Loader from '../components/Loader.svelte';
 	import { onMount } from 'svelte';
-	import type { Configuration, Configurations } from '$lib/types/api.type';
+	import type { Configuration, ConfigurationExtension, Configurations } from '$lib/types/api.type';
 
 	let activeExtensionProducts: Products = [];
 	let activeTab = 'OP01';
-	const onlyAGrade = true;
 	let displayLoader = true;
 	let totalPrices: TotatPrices = {
 		euroTaxesTotal: 0,
@@ -44,6 +43,8 @@
 	let showOnlyMissingCards = false;
 	let showSP = true;
 	let showManga = true;
+	let showOnlyMint = true;
+	let showOnlyParallel = true;
 	let showPSA10 = true;
 
 	let activeList: Products = [];
@@ -91,7 +92,7 @@
 						listOP01 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP01;
-							activeList = filterResult(result);
+							activeList = result;
 							calculateTotalPrices();
 						}
 						break;
@@ -99,7 +100,7 @@
 						listOP02 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP02;
-							activeList = filterResult(result);
+							activeList = result;
 							calculateTotalPrices();
 						}
 						break;
@@ -107,7 +108,7 @@
 						listOP03 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP03;
-							activeList = filterResult(result);
+							activeList = result;
 							calculateTotalPrices();
 						}
 						break;
@@ -115,7 +116,7 @@
 						listOP04 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP04;
-							activeList = filterResult(result);
+							activeList = result;
 							calculateTotalPrices();
 						}
 						break;
@@ -123,7 +124,7 @@
 						listOP05 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP05;
-							activeList = filterResult(result);
+							activeList = result;
 							calculateTotalPrices();
 						}
 						break;
@@ -131,7 +132,7 @@
 						listOP06 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP06;
-							activeList = filterResult(result);
+							activeList = result;
 							calculateTotalPrices();
 						}
 						break;
@@ -139,7 +140,7 @@
 						listOP07 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP07;
-							activeList = filterResult(result);
+							activeList = result;
 							calculateTotalPrices();
 						}
 						break;
@@ -147,7 +148,7 @@
 						listOP08 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP08;
-							activeList = filterResult(result);
+							activeList = result;
 							calculateTotalPrices();
 						}
 						break;
@@ -155,7 +156,7 @@
 						listPRB01 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listPRB01;
-							activeList = filterResult(result);
+							activeList = result;
 							calculateTotalPrices();
 						}
 						break;
@@ -179,11 +180,7 @@
 
 			configurations = result;
 			activeConfiguration = result[0] ?? undefined;
-			console.log(activeConfiguration);
 			activeConfigurationId = result[0].id ?? '';
-			console.log(activeConfigurationId);
-
-			console.log(configurations);
 		} catch (err: any) {
 			console.debug(err.message);
 		}
@@ -247,16 +244,12 @@
 						rarity: extractRarity(product.name),
 						code: extractCode(product.name),
 						state: extractState(product.name),
-						isMissingInCollection: true,
+						parallel: product.name.includes('パラレル'),
 						extension: extension
 					};
 				});
 
 				const arrayResults: Product[] = formattedResults
-					.filter((p) =>
-						onlyAGrade ? p.state === 'A' || p.state === 'PSA10' : p.state !== undefined
-					)
-					.filter((p) => p.name.includes('パラレル'))
 					.sort((a, b) => a.code.localeCompare(b.code));
 
 				switch (extension) {
@@ -315,12 +308,21 @@
 		if (!showSP) {
 			filteredList = filteredList.filter((p) => p.rarity !== 'SP');
 		}
+		if (showOnlyMint) {
+			filteredList = filteredList.filter((p) => p.state === 'A');
+		}
+		if (showOnlyParallel) {
+			filteredList = filteredList.filter((p) => p.parallel === true);
+		}
 		if (showOnlyMissingCards) {
 			if (activeConfiguration) {
 				const key = convertExtensionToConfigurationKey(activeTab);
 				if (Array.isArray(activeConfiguration[key])) {
-					const missingCardsOfActiveExtension: string[] = activeConfiguration[key] as string[];
-					filteredList = filteredList.filter((p) => missingCardsOfActiveExtension.includes(p.code));
+					const missingCardsOfActiveExtension: ConfigurationExtension[] = activeConfiguration[key] as ConfigurationExtension[];
+
+					filteredList = filteredList.filter((p) =>
+						missingCardsOfActiveExtension.some(m => m.name === p.code && m.parallel === p.parallel && m.rarity === p.rarity)
+					);
 				}
 			}
 		}
@@ -410,6 +412,18 @@
 		calculateTotalPrices();
 	}
 
+	function setShowOnlyParallel(value: boolean) {
+		showOnlyParallel = value;
+		activeExtensionProducts = filterResult(activeList);
+		calculateTotalPrices();
+	}
+
+	function setShowOnlyMint(value: boolean) {
+		showOnlyMint = value;
+		activeExtensionProducts = filterResult(activeList);
+		calculateTotalPrices();
+	}
+
 	async function addCards() {
 		await searchProducts();
 
@@ -439,38 +453,35 @@
 		loadData();
 	}
 
-	function handleMissingCardCheckboxChange(
-		event: Event,
-		code: string,
-		extension: keyof Configuration
-	) {
+	function handleMissingCardCheckboxChange(event: Event, code: string, parallel: boolean, rarity: string) {
 		const target = event.target as HTMLInputElement;
 		const value = target.checked;
 
-		console.log(value);
-
 		if (activeConfiguration) {
-			if (Array.isArray(activeConfiguration[extension])) {
-				const updatedCodes = new Set(activeConfiguration[extension]);
+			const extensionKey = convertExtensionToConfigurationKey(activeTab);
+			const currentExtensionData = activeConfiguration[extensionKey];
 
-				console.log();
+			if (Array.isArray(currentExtensionData)) {
+				const index = currentExtensionData.findIndex(
+					(item) => item.name === code && item.parallel === parallel && item.rarity === rarity
+				);
 
 				if (value) {
-					updatedCodes.add(code);
+					if (index === -1) {
+						currentExtensionData.push({ name: code, parallel, rarity });
+					}
 				} else {
-					updatedCodes.delete(code);
+					if (index !== -1) {
+						currentExtensionData.splice(index, 1);
+					}
 				}
-
-				console.log(updatedCodes);
 
 				activeConfiguration = {
 					...activeConfiguration,
-					[extension]: Array.from(updatedCodes)
+					[extensionKey]: [...currentExtensionData]
 				};
 			}
 		}
-
-		console.log(activeConfiguration);
 	}
 
 	async function saveConfiguration() {
@@ -495,10 +506,10 @@
 		}
 	}
 
-	loadConfiguration();
-
 	onMount(async () => {
+		await loadConfiguration();
 		await loadData();
+		filterResult(activeExtensionProducts);
 	});
 </script>
 
@@ -535,6 +546,9 @@
 		>
 			Cartes manquantes
 		</Checkbox>
+		<Checkbox checked={showOnlyParallel} on:click={() => setShowOnlyParallel(!showOnlyParallel)} class="text-color-100">
+			AA uniquement
+		</Checkbox>
 		<Checkbox checked={showSP} on:click={() => setShowSp(!showSP)} class="text-color-100">
 			SP
 		</Checkbox>
@@ -543,6 +557,9 @@
 		</Checkbox>
 		<Checkbox checked={showPSA10} on:click={() => setShowPSA10(!showPSA10)} class="text-color-100">
 			PSA 10
+		</Checkbox>
+		<Checkbox checked={showOnlyMint} on:click={() => setShowOnlyMint(!showOnlyMint)} class="text-color-100">
+			Mint uniquement
 		</Checkbox>
 		<Button on:click={() => addCards()}>Mettre à jour les prix</Button>
 		<Button on:click={() => saveConfiguration()}>Enregistrer liste cartes manquantes</Button>
@@ -601,13 +618,16 @@
 								checked={isCardMissing(
 									convertExtensionToConfigurationKey(activeTab),
 									item.code,
+									item.parallel,
+									item.rarity,
 									activeConfiguration
 								)}
 								on:change={(event) =>
 									handleMissingCardCheckboxChange(
 										event,
 										item.code,
-										convertExtensionToConfigurationKey(activeTab)
+										item.parallel,
+										item.rarity,
 									)}
 							/>
 						</TableBodyCell>
@@ -626,7 +646,7 @@
 </main>
 
 <style>
-	main {
-		width: 100%;
-	}
+    main {
+        width: 100%;
+    }
 </style>

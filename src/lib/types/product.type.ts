@@ -9,7 +9,7 @@ export type Product = {
 	rarity: string;
 	code: string;
 	state: string;
-	isMissingInCollection: boolean;
+	parallel: boolean;
 };
 
 export type Products = Product[];

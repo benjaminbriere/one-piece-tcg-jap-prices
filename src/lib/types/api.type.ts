@@ -5,16 +5,23 @@ export type AddCardsRequest = Product[];
 export type Configuration = {
 	id: string;
 	name: string;
-	op01: string[];
-	op02: string[];
-	op03: string[];
-	op04: string[];
-	op05: string[];
-	op06: string[];
-	op07: string[];
-	op08: string[];
-	op09: string[];
-	prb01: string[];
+	op01: ConfigurationExtension[];
+	op02: ConfigurationExtension[];
+	op03: ConfigurationExtension[];
+	op04: ConfigurationExtension[];
+	op05: ConfigurationExtension[];
+	op06: ConfigurationExtension[];
+	op07: ConfigurationExtension[];
+	op08: ConfigurationExtension[];
+	op09: ConfigurationExtension[];
+	prb01: ConfigurationExtension[];
 };
 
+export type ConfigurationExtension = {
+	name: string
+	parallel: boolean
+	rarity: string
+}
+
 export type Configurations = Configuration[];
+

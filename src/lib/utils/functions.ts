@@ -10,20 +10,14 @@ import {
 	SITE_OP08,
 	SITE_PRB01
 } from './constants';
-import {
-	missingOP01,
-	missingOP02,
-	missingOP03,
-	missingOP04,
-	missingOP05,
-	missingOP06,
-	missingOP07,
-	missingOP08
-} from './missingCards';
+
 import type { Configuration } from '$lib/types/api.type';
 
 export function extractRarity(str: string) {
 	const matches = str.match(/【([^】]+)】/g);
+	if (str.includes('漫画背景')) {
+		return 'MANGA';
+	}
 	if (matches) {
 		return matches.map((match) => match.slice(1, -1))[0]; // Supprimer les crochets
 	}
@@ -33,7 +27,7 @@ export function extractRarity(str: string) {
 export function extractCode(str: string) {
 	const matches = str.match(/{([^}]+)}/g);
 	if (matches) {
-		return matches.map((match) => match.slice(1, -1))[0]; // Supprimer les accolades
+		return matches.map((match) => match.slice(1, -1))[0].replace('○', ''); // Supprimer les accolades
 	}
 	return '';
 }
@@ -93,29 +87,6 @@ export function webURL(value: string) {
 	}
 }
 
-export function missingCardsList(value: string) {
-	switch (value) {
-		case 'OP01':
-			return missingOP01;
-		case 'OP02':
-			return missingOP02;
-		case 'OP03':
-			return missingOP03;
-		case 'OP04':
-			return missingOP04;
-		case 'OP05':
-			return missingOP05;
-		case 'OP06':
-			return missingOP06;
-		case 'OP07':
-			return missingOP07;
-		case 'OP08':
-			return missingOP08;
-		default:
-			return [];
-	}
-}
-
 export function convertExtensionToConfigurationKey(value: string): keyof Configuration {
 	switch (value) {
 		case 'OP01':
@@ -144,11 +115,17 @@ export function convertExtensionToConfigurationKey(value: string): keyof Configu
 export function isCardMissing(
 	key: keyof Configuration,
 	value: string,
+	parallel: boolean,
+	rarity: string,
 	configuration?: Configuration
 ): boolean {
 	if (configuration) {
-		if (Array.isArray(configuration[key])) {
-			return (configuration[key] as string[]).includes(value);
+		const currentExtensionData = configuration[key];
+
+		if (Array.isArray(currentExtensionData)) {
+			return currentExtensionData.some(
+				(item) => item.name === value && item.parallel === parallel && item.rarity === rarity
+			);
 		}
 	}
 	return false;
