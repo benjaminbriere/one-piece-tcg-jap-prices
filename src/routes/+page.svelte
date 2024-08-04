@@ -14,7 +14,7 @@
 		TableHeadCell,
 		Tabs
 	} from 'flowbite-svelte';
-	import { TAX_PRICE, YEN_PRICE } from '$lib/utils/constants';
+	import { TAX_PRICE } from '$lib/utils/constants';
 	import {
 		extractCode,
 		extractImageInfo,
@@ -36,6 +36,7 @@
 		euroTotal: 0,
 		yenTotal: 0
 	};
+	let yenPriceInEuro = 0
 
 	let showOnlyMissingCards = false;
 	let showSP = true;
@@ -170,9 +171,20 @@
 
 	async function searchProducts() {
 		displayLoader = true;
+		console.log(yenPriceInEuro)
 		// eslint-disable-next-line no-control-regex
 		const regex = new RegExp('\n', 'g');
 		const yenRegex = new RegExp('円', 'g');
+
+		listOP01 = []
+		listOP02 = []
+		listOP03 = []
+		listOP04 = []
+		listOP05 = []
+		listOP06 = []
+		listOP07 = []
+		listOP08 = []
+		listPRB01 = []
 
 		for (const extension of extensionsList) {
 			const webSiteUrl = webURL(extension);
@@ -203,7 +215,7 @@
 
 				const formattedResults = res.map((product: Product) => {
 					const yenPrice = Number(String(product.yenPrice).replace(yenRegex, '').replace(',', ''));
-					const euroPrice = Math.floor(yenPrice * YEN_PRICE * 100) / 100;
+					const euroPrice = Math.floor(yenPrice * yenPriceInEuro * 100) / 100;
 					const euroTaxPrice = Math.floor((euroPrice + euroPrice * TAX_PRICE) * 100) / 100;
 
 					return {
@@ -231,39 +243,30 @@
 				switch (extension) {
 					case 'OP01':
 						listOP01 = [...listOP01, ...arrayResults];
-						extensionsMap.set('OP01', listOP01);
 						break;
 					case 'OP02':
 						listOP02 = [...listOP02, ...arrayResults];
-						extensionsMap.set('OP02', listOP02);
 						break;
 					case 'OP03':
 						listOP03 = [...listOP03, ...arrayResults];
-						extensionsMap.set('OP03', listOP03);
 						break;
 					case 'OP04':
 						listOP04 = [...listOP04, ...arrayResults];
-						extensionsMap.set('OP04', listOP04);
 						break;
 					case 'OP05':
 						listOP05 = [...listOP05, ...arrayResults];
-						extensionsMap.set('OP05', listOP05);
 						break;
 					case 'OP06':
 						listOP06 = [...listOP06, ...arrayResults];
-						extensionsMap.set('OP06', listOP06);
 						break;
 					case 'OP07':
 						listOP07 = [...listOP07, ...arrayResults];
-						extensionsMap.set('OP07', listOP07);
 						break;
 					case 'OP08':
 						listOP08 = [...listOP08, ...arrayResults];
-						extensionsMap.set('OP08', listOP08);
 						break;
 					case 'PRB01':
 						listPRB01 = [...listPRB01, ...arrayResults];
-						extensionsMap.set('PRB01', listPRB01);
 						break;
 					default:
 						break;
@@ -271,7 +274,15 @@
 			}
 		}
 
-		displayLoader = false;
+		extensionsMap.set('OP01', listOP01);
+		extensionsMap.set('OP02', listOP02);
+		extensionsMap.set('OP03', listOP03);
+		extensionsMap.set('OP04', listOP04);
+		extensionsMap.set('OP05', listOP05);
+		extensionsMap.set('OP06', listOP06);
+		extensionsMap.set('OP07', listOP07);
+		extensionsMap.set('OP08', listOP08);
+		extensionsMap.set('PRB01', listPRB01);
 	}
 
 	function filterResult(list: Products) {
@@ -407,10 +418,12 @@
 				console.error('Fetch error:', err);
 			}
 		});
+		loadData();
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		loadData();
+		yenPriceInEuro = await (await fetch('api/utils/yenRate')).json()
 	});
 </script>
 
