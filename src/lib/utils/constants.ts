@@ -1,4 +1,3 @@
-export const YEN_PRICE = 0.006;
 export const TAX_PRICE = 0.2;
 
 export const SITE_OP01 =

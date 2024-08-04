@@ -116,25 +116,3 @@ export function missingCardsList(value: string) {
 			return [];
 	}
 }
-
-export async function getYenPrice() {
-
-	dotenv.config();
-
-	try {
-		const response = await fetch(`https://v6.exchangerate-api.com/v6/${process.env.EXCHANGE_RATE_API_KEY}/latest/JPY`);
-		if (!response.ok) {
-			throw new Error('API Exchange rate failed');
-		}
-		console.log(response);
-		const result = await response.json();
-		console.log(result);
-
-		console.log(result.conversion_rates.EUR);
-
-		return (result.conversion_rates.EUR);
-
-	} catch (err: any) {
-		console.debug(err.message);
-	}
-}
