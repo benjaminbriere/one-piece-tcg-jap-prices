@@ -4,6 +4,7 @@ export type Product = {
 	yenPrice: number;
 	euroPrice: number;
 	euroTaxPrice: number;
+	cardmarketPrice?: number;
 	url: string;
 	link?: string;
 	rarity: string;

@@ -15,6 +15,9 @@ import type { Configuration } from '$lib/types/api.type';
 
 export function extractRarity(str: string) {
 	const matches = str.match(/【([^】]+)】/g);
+	if (str.includes('SP')) {
+		return "SP"
+	}
 	if (str.includes('漫画背景')) {
 		return 'MANGA';
 	}

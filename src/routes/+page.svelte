@@ -45,7 +45,7 @@
 	let showManga = true;
 	let showOnlyMint = true;
 	let showOnlyParallel = true;
-	let showPSA10 = true;
+	let showPSA10 = false;
 
 	let activeList: Products = [];
 	let listOP01: Products = [];
@@ -204,7 +204,7 @@
 
 		for (const extension of extensionsList) {
 			const webSiteUrl = webURL(extension);
-			const maxPages = 3;
+			const maxPages = 8;
 
 			for (let i = 1; i <= maxPages; i++) {
 				const { data } = await scrapeIt(`${webSiteUrl}&page=${i}`, {
@@ -230,7 +230,8 @@
 				const res: Products = data.products;
 
 				const formattedResults = res.map((product: Product) => {
-					const yenPrice = Number(String(product.yenPrice).replace(yenRegex, '').replace(',', ''));
+					console.log(yenPriceInEuro);
+					const yenPrice = Number(String(product.yenPrice).replace(yenRegex, '').replace(',', '')) * 1.05;
 					const euroPrice = Math.floor(yenPrice * yenPriceInEuro * 100) / 100;
 					const euroTaxPrice = Math.floor((euroPrice + euroPrice * TAX_PRICE) * 100) / 100;
 
@@ -300,7 +301,10 @@
 	function filterResult(list: Products) {
 		let filteredList: Products = list;
 		if (!showPSA10) {
-			filteredList = filteredList.filter((p) => p.state === 'A');
+			filteredList = filteredList.filter((p) => p.state !== 'PSA10');
+		}
+		if (showPSA10) {
+			filteredList = filteredList.filter((p) => p.state === 'PSA10');
 		}
 		if (!showManga) {
 			filteredList = filteredList.filter((p) => !p.name.includes('漫画背景'));
@@ -312,7 +316,9 @@
 			filteredList = filteredList.filter((p) => p.state === 'A');
 		}
 		if (showOnlyParallel) {
+			console.log(showOnlyParallel);
 			filteredList = filteredList.filter((p) => p.parallel === true);
+			console.log(filteredList);
 		}
 		if (showOnlyMissingCards) {
 			if (activeConfiguration) {
@@ -326,6 +332,7 @@
 				}
 			}
 		}
+		console.log(filteredList);
 		return filteredList;
 	}
 
@@ -425,9 +432,10 @@
 	}
 
 	async function addCards() {
-		await searchProducts();
 
 		yenPriceInEuro = await (await fetch('api/utils/yenRate')).json();
+
+		await searchProducts();
 
 		extensionsMap.forEach(async (extension) => {
 			try {
@@ -509,7 +517,7 @@
 	onMount(async () => {
 		await loadConfiguration();
 		await loadData();
-		filterResult(activeExtensionProducts);
+		activeExtensionProducts = filterResult(activeExtensionProducts);
 	});
 </script>
 
@@ -608,6 +616,7 @@
 			<TableHeadCell>Prix Yen</TableHeadCell>
 			<TableHeadCell>Prix EURO (HT)</TableHeadCell>
 			<TableHeadCell>Prix EURO (TTC)</TableHeadCell>
+			<TableHeadCell>Cardmarket (TTC)</TableHeadCell>
 		</TableHead>
 		<TableBody tableBodyClass="divide-y">
 			{#if activeExtensionProducts}
@@ -637,7 +646,12 @@
 						<TableBodyCell>{item.state}</TableBodyCell>
 						<TableBodyCell>{item.yenPrice}</TableBodyCell>
 						<TableBodyCell>{item.euroPrice} €</TableBodyCell>
-						<TableBodyCell>{item.euroTaxPrice} €</TableBodyCell>
+						<TableBodyCell><p
+							class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-red-500" : "text-green-500"}>{item.euroTaxPrice}
+							€</p></TableBodyCell>
+						<TableBodyCell><p
+							class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-green-500" : "text-red-500"}> {item.cardmarketPrice ? `${item.cardmarketPrice} €` : '-'}</p>
+						</TableBodyCell>
 					</TableBodyRow>
 				{/each}
 			{/if}
