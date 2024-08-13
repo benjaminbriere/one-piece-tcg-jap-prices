@@ -14,7 +14,8 @@
 		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-		Tabs
+		Tabs,
+		Toast
 	} from 'flowbite-svelte';
 	import { TAX_PRICE } from '$lib/utils/constants';
 	import {
@@ -29,6 +30,7 @@
 	import Loader from '../components/Loader.svelte';
 	import { onMount } from 'svelte';
 	import type { Configuration, ConfigurationExtension, Configurations } from '$lib/types/api.type';
+	import { CheckCircleSolid, CloseCircleSolid } from 'flowbite-svelte-icons';
 
 	let activeExtensionProducts: Products = [];
 	let activeTab = 'OP01';
@@ -39,6 +41,9 @@
 		yenTotal: 0
 	};
 	let yenPriceInEuro = 0;
+
+	// Toaster
+	let toasts: { message: string, type: string }[] = [];
 
 	let showOnlyMissingCards = false;
 	let showSP = true;
@@ -437,7 +442,7 @@
 
 		await searchProducts();
 
-		extensionsMap.forEach(async (extension) => {
+		for (const [key, extension] of extensionsMap) {
 			try {
 				const response = await fetch('/api/card/add', {
 					method: 'POST',
@@ -450,14 +455,17 @@
 				if (response.ok) {
 					const data = await response.json();
 					console.debug('Data added:', data);
+					toasts = [...toasts, { message: `Prix de ${key} mis à jour`, type: 'success' }];
 				} else {
 					const error = await response.json();
 					console.error('Error adding data:', error.message);
+					toasts = [...toasts, { message: `Erreur dans l'import des prix de ${key}`, type: 'error' }];
 				}
 			} catch (err) {
 				console.error('Fetch error:', err);
+				toasts = [...toasts, { message: `Erreur API pour ${key}`, type: 'error' }];
 			}
-		});
+		}
 		loadData();
 	}
 
@@ -512,6 +520,10 @@
 		} catch (err) {
 			console.error('Fetch error:', err);
 		}
+	}
+
+	function removeToast(index: number) {
+		toasts = toasts.filter((_, i) => i !== index);
 	}
 
 	onMount(async () => {
@@ -657,10 +669,40 @@
 			{/if}
 		</TableBody>
 	</Table>
+
+	<div class="toast-container">
+		{#each toasts as toast, index}
+			<Toast on:hide={() => removeToast(index)} color={toast.type === "success" ? "green" : "red"}>
+				<svelte:fragment slot="icon">
+					{#if toast.type === "success" }
+						<CheckCircleSolid class="w-5 h-5" />
+						<span class="sr-only">Check icon</span>
+					{/if}
+					{#if toast.type === "error" }
+						<CloseCircleSolid class="w-5 h-5" />
+						<span class="sr-only">Error icon</span>
+					{/if}
+				</svelte:fragment>
+				{toast.message}
+			</Toast>
+		{/each}
+	</div>
+
 </main>
 
 <style>
     main {
         width: 100%;
     }
+
+    .toast-container {
+        position: fixed;
+        top: 20px; /* Position de départ */
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Espace entre les toasts */
+    }
+
 </style>

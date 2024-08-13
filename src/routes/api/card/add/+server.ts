@@ -48,32 +48,36 @@ export async function POST({ request }) {
 
 			if (existingCard) {
 				// Si le code et l'état existent déjà, mettre à jour les prix
-				console.log(`Updating card with code: ${card.code}, state: ${card.state}`);
-				console.log(
-					`Old prices - Yen: ${existingCard.yenPrice}, Euro: ${existingCard.euroPrice}, EuroTax: ${existingCard.euroTaxPrice}`
-				);
-				console.log(
-					`New prices - Yen: ${card.yenPrice}, Euro: ${card.euroPrice}, EuroTax: ${card.euroTaxPrice}`
-				);
+				if(existingCard.yenPrice !== card.yenPrice || existingCard.euroPrice !== card.euroPrice || existingCard.euroTaxPrice !== card.euroTaxPrice) {
 
-				const { error: updateError } = await supabase
-					.from('cards')
-					.update({
-						yenPrice: card.yenPrice,
-						euroPrice: card.euroPrice,
-						euroTaxPrice: card.euroTaxPrice
-					})
-					.eq('id', existingCard.id); // Mise à jour basée sur l'ID
+					console.log(`Updating card with code: ${card.code}, state: ${card.state}`);
+					console.log(
+						`Old prices - Yen: ${existingCard.yenPrice}, Euro: ${existingCard.euroPrice}, EuroTax: ${existingCard.euroTaxPrice}`
+					);
+					console.log(
+						`New prices - Yen: ${card.yenPrice}, Euro: ${card.euroPrice}, EuroTax: ${card.euroTaxPrice}`
+					);
 
-				if (updateError) {
-					console.error('Error updating data:', updateError.message);
-					return new Response(JSON.stringify({ message: updateError.message }), {
-						status: 500,
-						headers: { 'Content-Type': 'application/json' }
-					});
+					const { error: updateError } = await supabase
+						.from('cards')
+						.update({
+							yenPrice: card.yenPrice,
+							euroPrice: card.euroPrice,
+							euroTaxPrice: card.euroTaxPrice
+						})
+						.eq('id', existingCard.id); // Mise à jour basée sur l'ID
+
+					if (updateError) {
+						console.error('Error updating data:', updateError.message);
+						return new Response(JSON.stringify({ message: updateError.message }), {
+							status: 500,
+							headers: { 'Content-Type': 'application/json' }
+						});
+					}
+
+					results.push({ action: 'updated', code: card.code, state: card.state });
 				}
 
-				results.push({ action: 'updated', code: card.code, state: card.state });
 			} else {
 				// Si le code et l'état n'existent pas, insérer une nouvelle carte
 				const { error: insertError } = await supabase.from('cards').insert(card).select(); // Sélectionner les données insérées pour confirmation
