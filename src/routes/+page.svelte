@@ -204,7 +204,7 @@
 
 		for (const extension of extensionsList) {
 			const webSiteUrl = webURL(extension);
-			const maxPages = 8;
+			const maxPages = 3;
 
 			for (let i = 1; i <= maxPages; i++) {
 				const { data } = await scrapeIt(`${webSiteUrl}&page=${i}`, {
