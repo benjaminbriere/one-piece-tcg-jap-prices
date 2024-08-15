@@ -1,7 +1,52 @@
 import { supabase } from '$lib/supabaseClient';
 import type { AddCardsRequest } from '$lib/types/api.type.js';
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Définition de __filename et __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export async function POST({ request }) {
+
+	async function downloadImage(url: string, filepath: string) {
+		const response = await fetch(url);
+		if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+
+		const arrayBuffer = await response.arrayBuffer();
+		const buffer = Buffer.from(arrayBuffer);
+
+		fs.writeFileSync(filepath, buffer);
+	}
+
+	async function downloadAndSaveImage(url: string, code: string, rarity: string, state: string, parallel: boolean) {
+
+		// Créez un dossier pour les images s'il n'existe pas
+		const imagesDir = path.join(__dirname, 'static', 'images');
+		if (!fs.existsSync(imagesDir)) {
+			fs.mkdirSync(imagesDir);
+		}
+
+		const filename = `${code}${parallel? `_aa`: ''}${rarity === "MANGA" ? `_manga`: ''}${state === "PSA10" ? `_psa`: ''}.png`; // Récupère le nom de fichier depuis l'URL
+		const filepath = path.join(imagesDir, filename);
+
+		if (fs.existsSync(filepath)) {
+			console.log(`File already exists: ${filename}`);
+			return filename; // Passez au fichier suivant si celui-ci existe déjà
+		}
+
+		try {
+			await downloadImage(url, filepath);
+			console.log(`Downloaded and saved ${filename}`);
+			return filename;
+		} catch (error) {
+			console.error(`Error downloading ${url}:`, error);
+		}
+	}
+
 	try {
 		const cards: AddCardsRequest = await request.json();
 
@@ -30,7 +75,7 @@ export async function POST({ request }) {
 			// Vérifier si le code et l'état existent déjà dans la base
 			const { data: existingCard, error: fetchError } = await supabase
 				.from('cards')
-				.select('id, yenPrice, euroPrice, euroTaxPrice')
+				.select('id, yenPrice, euroPrice, euroTaxPrice, link, local_url')
 				.eq('code', card.code)
 				.eq('rarity', card.rarity)
 				.eq('state', card.state)
@@ -47,8 +92,19 @@ export async function POST({ request }) {
 			}
 
 			if (existingCard) {
+				let localURL = existingCard.local_url;
+				if(localURL === null){
+					localURL = await downloadAndSaveImage(card.url, card.code, card.rarity, card.state, card.parallel)
+				}
+
 				// Si le code et l'état existent déjà, mettre à jour les prix
-				if(existingCard.yenPrice !== card.yenPrice || existingCard.euroPrice !== card.euroPrice || existingCard.euroTaxPrice !== card.euroTaxPrice) {
+				if (
+					existingCard.yenPrice !== card.yenPrice
+					|| existingCard.euroPrice !== card.euroPrice
+					|| existingCard.euroTaxPrice !== card.euroTaxPrice
+					|| existingCard.link !== card.link
+					|| existingCard.local_url !== localURL
+				) {
 
 					console.log(`Updating card with code: ${card.code}, state: ${card.state}`);
 					console.log(
@@ -63,7 +119,9 @@ export async function POST({ request }) {
 						.update({
 							yenPrice: card.yenPrice,
 							euroPrice: card.euroPrice,
-							euroTaxPrice: card.euroTaxPrice
+							euroTaxPrice: card.euroTaxPrice,
+							link: card.link,
+							local_url: localURL,
 						})
 						.eq('id', existingCard.id); // Mise à jour basée sur l'ID
 
@@ -80,7 +138,9 @@ export async function POST({ request }) {
 
 			} else {
 				// Si le code et l'état n'existent pas, insérer une nouvelle carte
-				const { error: insertError } = await supabase.from('cards').insert(card).select(); // Sélectionner les données insérées pour confirmation
+				const localURL = await downloadAndSaveImage(card.url, card.code, card.rarity, card.state, card.parallel)
+
+				const { error: insertError } = await supabase.from('cards').insert({...card, local_url: localURL} ).select(); // Sélectionner les données insérées pour confirmation
 
 				if (insertError) {
 					console.error('Error inserting data:', insertError.message);

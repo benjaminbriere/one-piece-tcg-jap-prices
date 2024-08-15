@@ -222,7 +222,11 @@
 								convert: (x: string) => x.replace(regex, '')
 							},
 							yenPrice: '.selling_price > .figure',
-							link: '.item_data > a',
+							link:
+								{
+									selector: '.item_data_link',
+									attr: "href"
+								},
 							url: {
 								selector: '.global_photo',
 								how: 'html'
@@ -235,7 +239,6 @@
 				const res: Products = data.products;
 
 				const formattedResults = res.map((product: Product) => {
-					console.log(yenPriceInEuro);
 					const yenPrice = Number(String(product.yenPrice).replace(yenRegex, '').replace(',', '')) * 1.05;
 					const euroPrice = Math.floor(yenPrice * yenPriceInEuro * 100) / 100;
 					const euroTaxPrice = Math.floor((euroPrice + euroPrice * TAX_PRICE) * 100) / 100;
@@ -652,8 +655,8 @@
 									)}
 							/>
 						</TableBodyCell>
-						<TableBodyCell><img src={item.url} alt={item.name} /></TableBodyCell>
-						<TableBodyCell>{item.code}</TableBodyCell>
+						<TableBodyCell><img src={`images/${item.local_url}`} alt={item.name}/></TableBodyCell>
+						<TableBodyCell><a href="{item.link}" target="_blank" class="text-primary-600 underline">{item.code}</a></TableBodyCell>
 						<TableBodyCell>{item.rarity}</TableBodyCell>
 						<TableBodyCell>{item.state}</TableBodyCell>
 						<TableBodyCell>{item.yenPrice}</TableBodyCell>
@@ -693,6 +696,7 @@
 <style>
     main {
         width: 100%;
+				min-height: 100vh;
     }
 
     .toast-container {

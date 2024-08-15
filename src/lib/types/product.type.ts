@@ -11,6 +11,7 @@ export type Product = {
 	code: string;
 	state: string;
 	parallel: boolean;
+	local_url?: string;
 };
 
 export type Products = Product[];
