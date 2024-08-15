@@ -3,7 +3,7 @@
 	import scrapeIt from 'scrape-it';
 	import type { Product, Products, TotatPrices } from '$lib/types/product.type';
 	import {
-		Button,
+		Button, Card,
 		Checkbox,
 		Label,
 		Select,
@@ -225,7 +225,7 @@
 							link:
 								{
 									selector: '.item_data_link',
-									attr: "href"
+									attr: 'href'
 								},
 							url: {
 								selector: '.global_photo',
@@ -621,7 +621,7 @@
 			{/if}
 		</TableBody>
 	</Table>
-	<Table>
+	<Table class="hidden lg:table">
 		<TableHead>
 			<TableHeadCell>Manquante</TableHeadCell>
 			<TableHeadCell></TableHeadCell>
@@ -655,23 +655,70 @@
 									)}
 							/>
 						</TableBodyCell>
-						<TableBodyCell><img src={`images/${item.local_url}`} alt={item.name}/></TableBodyCell>
-						<TableBodyCell><a href="{item.link}" target="_blank" class="text-primary-600 underline">{item.code}</a></TableBodyCell>
+						<TableBodyCell><img src={`images/${item.local_url}`} alt={item.name} /></TableBodyCell>
+						<TableBodyCell><a href="{item.link}" target="_blank" class="text-primary-600 underline">{item.code}</a>
+						</TableBodyCell>
 						<TableBodyCell>{item.rarity}</TableBodyCell>
 						<TableBodyCell>{item.state}</TableBodyCell>
 						<TableBodyCell>{item.yenPrice}</TableBodyCell>
-						<TableBodyCell>{item.euroPrice} €</TableBodyCell>
+						<TableBodyCell>{item.euroPrice}€</TableBodyCell>
 						<TableBodyCell><p
 							class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-red-500" : "text-green-500"}>{item.euroTaxPrice}
 							€</p></TableBodyCell>
 						<TableBodyCell><p
-							class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-green-500" : "text-red-500"}> {item.cardmarketPrice ? `${item.cardmarketPrice} €` : '-'}</p>
+							class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-green-500" : "text-red-500"}> {item.cardmarketPrice ? `${item.cardmarketPrice}€` : '-'}</p>
 						</TableBodyCell>
 					</TableBodyRow>
 				{/each}
 			{/if}
 		</TableBody>
 	</Table>
+
+	<div class="flex flex-wrap sm:flex lg:hidden">
+		{#each activeExtensionProducts as item}
+			<div class="m-auto w-1/2 sm:w-1/3 lg:w-1/4 p-2">
+				<Card img={`images/${item.local_url}`}>
+					<div class="flex justify-between">
+						<h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white"><a href="{item.link}"
+																																															 target="_blank"
+																																															 class="text-primary-600 underline">{item.code}</a>
+
+						</h5>
+						<Checkbox
+							checked={isCardMissing(
+									convertExtensionToConfigurationKey(activeTab),
+									item.code,
+									item.parallel,
+									item.rarity,
+									activeConfiguration
+								)}
+							on:change={(event) =>
+									handleMissingCardCheckboxChange(
+										event,
+										item.code,
+										item.parallel,
+										item.rarity,
+									)}
+						/>
+					</div>
+					<div class="flex justify-between">
+						<div>
+							<p class="text-sm text-gray-900 dark:text-white">Cardrush</p>
+							<p
+								class={`text-md font-bold ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-red-500" : "text-green-500"}`}>{item.euroTaxPrice}
+								€</p>
+						</div>
+						<div>
+							<p class="text-sm text-gray-900 dark:text-white">Cardmarket</p>
+							<p
+								class={`text-md font-bold ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-green-500" : "text-red-500"}`}>{item.cardmarketPrice ? `${item.cardmarketPrice} €` : '-'}</p>
+						</div>
+					</div>
+				</Card>
+			</div>
+		{/each}
+	</div>
+
 
 	<div class="toast-container">
 		{#each toasts as toast, index}
@@ -696,7 +743,7 @@
 <style>
     main {
         width: 100%;
-				min-height: 100vh;
+        min-height: 100vh;
     }
 
     .toast-container {
