@@ -515,9 +515,11 @@
 
 			if (response.ok) {
 				const data = await response.json();
+				toasts = [...toasts, { message: `Sélection de ${activeConfiguration?.name} mise à jour`, type: 'success' }];
 				console.debug('Data added:', data);
 			} else {
 				const error = await response.json();
+				toasts = [...toasts, { message: `Erreur dans mise à jour de la sélection de ${activeConfiguration?.name}`, type: 'success' }];
 				console.error('Error adding data:', error.message);
 			}
 		} catch (err) {
