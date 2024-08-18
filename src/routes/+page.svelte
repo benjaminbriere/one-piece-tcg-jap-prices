@@ -626,7 +626,7 @@
 			{/if}
 		</TableBody>
 	</Table>
-	<Table class="hidden lg:table">
+	<Table class="hidden xl:table">
 		<TableHead>
 			<TableHeadCell>Manquante</TableHeadCell>
 			<TableHeadCell></TableHeadCell>
@@ -693,7 +693,7 @@
 		</TableBody>
 	</Table>
 
-	<div class="flex flex-wrap sm:flex lg:hidden">
+	<div class="flex flex-wrap xl:hidden">
 		{#each activeExtensionProducts as item}
 			<div class="m-auto w-1/2 sm:w-1/3 lg:w-1/4 p-2">
 				<Card img={`images/${item.local_url}`}>
