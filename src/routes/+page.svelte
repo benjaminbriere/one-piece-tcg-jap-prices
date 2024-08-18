@@ -3,7 +3,8 @@
 	import scrapeIt from 'scrape-it';
 	import type { Product, Products, TotatPrices } from '$lib/types/product.type';
 	import {
-		Button, Card,
+		Button,
+		Card,
 		Checkbox,
 		Label,
 		Select,
@@ -23,7 +24,7 @@
 		extractCode,
 		extractImageInfo,
 		extractRarity,
-		extractState,
+		extractState, generateKey,
 		isCardMissing,
 		webURL
 	} from '$lib/utils/functions';
@@ -31,6 +32,7 @@
 	import { onMount } from 'svelte';
 	import type { Configuration, ConfigurationExtension, Configurations } from '$lib/types/api.type';
 	import { CheckCircleSolid, CloseCircleSolid } from 'flowbite-svelte-icons';
+	import PriceIcon from '../components/PriceIcon.svelte';
 
 	let activeExtensionProducts: Products = [];
 	let activeTab = 'OP01';
@@ -45,7 +47,7 @@
 	// Toaster
 	let toasts: { message: string, type: string }[] = [];
 
-	let showOnlyMissingCards = false;
+	let showOnlyMissingCards = true;
 	let showSP = true;
 	let showManga = true;
 	let showOnlyMint = true;
@@ -254,6 +256,7 @@
 						code: extractCode(product.name),
 						state: extractState(product.name),
 						parallel: product.name.includes('パラレル'),
+						previousEuroTaxPrice: undefined,
 						extension: extension
 					};
 				});
@@ -324,9 +327,7 @@
 			filteredList = filteredList.filter((p) => p.state === 'A');
 		}
 		if (showOnlyParallel) {
-			console.log(showOnlyParallel);
 			filteredList = filteredList.filter((p) => p.parallel === true);
-			console.log(filteredList);
 		}
 		if (showOnlyMissingCards) {
 			if (activeConfiguration) {
@@ -340,7 +341,6 @@
 				}
 			}
 		}
-		console.log(filteredList);
 		return filteredList;
 	}
 
@@ -519,7 +519,10 @@
 				console.debug('Data added:', data);
 			} else {
 				const error = await response.json();
-				toasts = [...toasts, { message: `Erreur dans mise à jour de la sélection de ${activeConfiguration?.name}`, type: 'success' }];
+				toasts = [...toasts, {
+					message: `Erreur dans mise à jour de la sélection de ${activeConfiguration?.name}`,
+					type: 'success'
+				}];
 				console.error('Error adding data:', error.message);
 			}
 		} catch (err) {
@@ -632,43 +635,57 @@
 			<TableHeadCell>Etat</TableHeadCell>
 			<TableHeadCell>Prix Yen</TableHeadCell>
 			<TableHeadCell>Prix EURO (HT)</TableHeadCell>
+			<TableHeadCell>Précédent prix (TTC)</TableHeadCell>
 			<TableHeadCell>Prix EURO (TTC)</TableHeadCell>
 			<TableHeadCell>Cardmarket (TTC)</TableHeadCell>
 		</TableHead>
 		<TableBody tableBodyClass="divide-y">
 			{#if activeExtensionProducts}
-				{#each activeExtensionProducts as item}
+				{#each activeExtensionProducts as item (generateKey(item))}
 					<TableBodyRow>
 						<TableBodyCell>
 							<Checkbox
 								checked={isCardMissing(
-									convertExtensionToConfigurationKey(activeTab),
-									item.code,
-									item.parallel,
-									item.rarity,
-									activeConfiguration
-								)}
+                convertExtensionToConfigurationKey(activeTab),
+                item.code,
+                item.parallel,
+                item.rarity,
+                activeConfiguration
+              )}
 								on:change={(event) =>
-									handleMissingCardCheckboxChange(
-										event,
-										item.code,
-										item.parallel,
-										item.rarity,
-									)}
+                handleMissingCardCheckboxChange(
+                  event,
+                  item.code,
+                  item.parallel,
+                  item.rarity,
+                )}
 							/>
 						</TableBodyCell>
 						<TableBodyCell><img src={`images/${item.local_url}`} alt={item.name} /></TableBodyCell>
-						<TableBodyCell><a href="{item.link}" target="_blank" class="text-primary-600 underline">{item.code}</a>
+						<TableBodyCell>
+							<a href="{item.link}" target="_blank" class="text-primary-600 underline">{item.code}</a>
 						</TableBodyCell>
 						<TableBodyCell>{item.rarity}</TableBodyCell>
 						<TableBodyCell>{item.state}</TableBodyCell>
 						<TableBodyCell>{item.yenPrice}</TableBodyCell>
 						<TableBodyCell>{item.euroPrice}€</TableBodyCell>
-						<TableBodyCell><p
-							class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-red-500" : "text-green-500"}>{item.euroTaxPrice}
-							€</p></TableBodyCell>
-						<TableBodyCell><p
-							class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-green-500" : "text-red-500"}> {item.cardmarketPrice ? `${item.cardmarketPrice}€` : '-'}</p>
+						<TableBodyCell>{item?.previousEuroTaxPrice ? `${item?.previousEuroTaxPrice}€` : '-'}</TableBodyCell>
+						<TableBodyCell>
+							<div class="flex">
+								<PriceIcon
+									euroTaxPrice={item.euroTaxPrice}
+									previousTaxPrice={item?.previousEuroTaxPrice}
+								/>
+								<span
+									class={`pl-1 pt-1 ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-red-500" : "text-green-500"}`}>
+                {item.euroTaxPrice} €
+              </span>
+							</div>
+						</TableBodyCell>
+						<TableBodyCell>
+							<p class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-green-500" : "text-red-500"}>
+								{item.cardmarketPrice ? `${item.cardmarketPrice}€` : '-'}
+							</p>
 						</TableBodyCell>
 					</TableBodyRow>
 				{/each}

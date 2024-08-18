@@ -4,6 +4,7 @@ export type Product = {
 	yenPrice: number;
 	euroPrice: number;
 	euroTaxPrice: number;
+	previousEuroTaxPrice: number | undefined | null;
 	cardmarketPrice?: number;
 	url: string;
 	link?: string;

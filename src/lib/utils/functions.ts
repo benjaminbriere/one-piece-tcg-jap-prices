@@ -12,6 +12,7 @@ import {
 } from './constants';
 
 import type { Configuration } from '$lib/types/api.type';
+import { ChartLineUpOutline } from 'flowbite-svelte-icons';
 
 export function extractRarity(str: string) {
 	const matches = str.match(/【([^】]+)】/g);
@@ -132,4 +133,8 @@ export function isCardMissing(
 		}
 	}
 	return false;
+}
+
+export function generateKey(item: Product) {
+	return `${item.code}-${item.rarity}-${item.state}-${item.parallel}`;
 }

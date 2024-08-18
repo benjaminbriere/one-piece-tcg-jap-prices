@@ -122,6 +122,7 @@ export async function POST({ request }) {
 							euroTaxPrice: card.euroTaxPrice,
 							link: card.link,
 							local_url: localURL,
+							previousEuroTaxPrice: existingCard.euroTaxPrice,
 						})
 						.eq('id', existingCard.id); // Mise à jour basée sur l'ID
 
