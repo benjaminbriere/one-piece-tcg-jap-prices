@@ -20,7 +20,7 @@
 	} from 'flowbite-svelte';
 	import { TAX_PRICE } from '$lib/utils/constants';
 	import {
-		convertExtensionToConfigurationKey,
+		convertExtensionToConfigurationKey, convertToCSV,
 		extractCode,
 		extractImageInfo,
 		extractRarity,
@@ -65,7 +65,7 @@
 	let listOP08: Products = [];
 	let listPRB01: Products = [];
 
-	const extensionsList = ['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'PRB01'];
+	const extensionsList = ['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08'];
 
 	let configurations: Configurations = [];
 	let activeConfiguration: Configuration | undefined;
@@ -309,7 +309,7 @@
 		extensionsMap.set('PRB01', listPRB01);
 	}
 
-	function filterResult(list: Products) {
+	function filterResult(list: Products, configuration?: string) {
 		let filteredList: Products = list;
 		if (!showPSA10) {
 			filteredList = filteredList.filter((p) => p.state !== 'PSA10');
@@ -331,7 +331,7 @@
 		}
 		if (showOnlyMissingCards) {
 			if (activeConfiguration) {
-				const key = convertExtensionToConfigurationKey(activeTab);
+				const key = convertExtensionToConfigurationKey(configuration ?? activeTab);
 				if (Array.isArray(activeConfiguration[key])) {
 					const missingCardsOfActiveExtension: ConfigurationExtension[] = activeConfiguration[key] as ConfigurationExtension[];
 
@@ -530,6 +530,31 @@
 		}
 	}
 
+	function exportConfiguration(){
+		const allCards = [
+			...filterResult(listOP01, "OP01"),
+			...filterResult(listOP02, "OP02"),
+			...filterResult(listOP03, "OP03"),
+			...filterResult(listOP04, "OP04"),
+			...filterResult(listOP05, "OP05"),
+			...filterResult(listOP06, "OP06"),
+			...filterResult(listOP07, "OP07"),
+			...filterResult(listOP08, "OP08"),
+			...filterResult(listPRB01, "PRB01"),
+		];
+		const csv = convertToCSV(allCards);
+		const blob = new Blob([csv], { type: 'text/csv' });
+		const url = window.URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.setAttribute('hidden', '');
+		a.setAttribute('href', url);
+		a.setAttribute('download', 'data.csv');
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+
+	}
+
 	function removeToast(index: number) {
 		toasts = toasts.filter((_, i) => i !== index);
 	}
@@ -591,6 +616,7 @@
 		</Checkbox>
 		<Button on:click={() => addCards()}>Mettre à jour les prix</Button>
 		<Button on:click={() => saveConfiguration()}>Enregistrer liste cartes manquantes</Button>
+		<Button on:click={() => exportConfiguration()}>Exporter les cartes manquantes</Button>
 	</div>
 
 	{#if configurations.length > 0 && activeConfigurationId}

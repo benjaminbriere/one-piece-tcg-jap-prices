@@ -25,7 +25,7 @@ export async function POST({ request }) {
 	async function downloadAndSaveImage(url: string, code: string, rarity: string, state: string, parallel: boolean) {
 
 		// Créez un dossier pour les images s'il n'existe pas
-		const imagesDir = path.join(__dirname, 'static', 'images');
+		const imagesDir = path.join(__dirname, 'images');
 		if (!fs.existsSync(imagesDir)) {
 			fs.mkdirSync(imagesDir);
 		}

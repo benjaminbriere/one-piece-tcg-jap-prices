@@ -12,7 +12,6 @@ import {
 } from './constants';
 
 import type { Configuration } from '$lib/types/api.type';
-import { ChartLineUpOutline } from 'flowbite-svelte-icons';
 
 export function extractRarity(str: string) {
 	const matches = str.match(/【([^】]+)】/g);
@@ -58,6 +57,13 @@ export function extractState(str: string) {
 	const matches = str.match(/〔([^〕]+)〕/g);
 	const state = matches?.[0].slice(1, -1) ?? '';
 	if (state === 'PSA10鑑定済') return 'PSA10';
+	if (state === 'PSA9鑑定済') return 'PSA9';
+	if (state === 'PSA8鑑定済') return 'PSA8';
+	if (state === 'PSA7鑑定済') return 'PSA7';
+	if (state === 'PSA6鑑定済') return 'PSA6';
+	if (state === 'PSA5鑑定済') return 'PSA5';
+	if (state === 'PSA4鑑定済') return 'PSA4';
+	if (state === 'PSA3鑑定済') return 'PSA3';
 	if (state === '状態A-') return 'A-';
 	if (state === '状態B-') return 'B-';
 	if (state === '状態C-') return 'C-';
@@ -137,4 +143,28 @@ export function isCardMissing(
 
 export function generateKey(item: Product) {
 	return `${item.code}-${item.rarity}-${item.state}-${item.parallel}`;
+}
+
+export function convertToCSV(objArray: string | object) {
+	const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
+
+	// Extraire les clés pour créer les en-têtes
+	const headers = Object.keys(array[0]);
+
+	// Créer une chaîne de texte avec les en-têtes et les données
+	// @ts-expect-error type
+	const csvRows = array.map(obj =>
+		headers.map(header => JSON.stringify(obj[header], replacer)).join(',')
+	);
+
+	// Ajouter les en-têtes au début
+	csvRows.unshift(headers.join(','));
+
+	// Retourner la chaîne CSV
+	return csvRows.join('\r\n');
+}
+
+// Replacer pour gérer les valeurs nulles et indéfinies
+export function replacer(key: string, value: unknown): unknown {
+	return value === null || value === undefined ? '' : value;
 }
