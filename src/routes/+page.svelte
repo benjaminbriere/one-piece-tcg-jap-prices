@@ -6,7 +6,7 @@
 		Button,
 		Card,
 		Checkbox,
-		Label,
+		Label, Popover,
 		Select,
 		TabItem,
 		Table,
@@ -33,6 +33,7 @@
 	import type { Configuration, ConfigurationExtension, Configurations } from '$lib/types/api.type';
 	import { CheckCircleSolid, CloseCircleSolid } from 'flowbite-svelte-icons';
 	import PriceIcon from '../components/PriceIcon.svelte';
+	import HistoryPriceChart from '../components/HistoryPriceChart.svelte';
 
 	let activeExtensionProducts: Products = [];
 	let activeTab = 'OP01';
@@ -716,7 +717,18 @@
 						<TableBodyCell>{item.state}</TableBodyCell>
 						<TableBodyCell>{item.yenPrice}</TableBodyCell>
 						<TableBodyCell>{item.euroPrice}€</TableBodyCell>
-						<TableBodyCell>{item?.previousEuroTaxPrice ? `${item?.previousEuroTaxPrice}€` : '-'}</TableBodyCell>
+						<TableBodyCell>
+							<div id={`history_price_${item.code.replace('[', '_').replace(']','_')}_${item.rarity}_${item.state}`}>{item?.previousEuroTaxPrice ? `${item?.previousEuroTaxPrice}€` : '-'}</div>
+							<Popover triggeredBy={`#history_price_${item.code.replace('[', '_').replace(']','_')}_${item.rarity}_${item.state}`} placement="top">
+								<div class="min-w-80">
+									{#if item.historyPrice && item.historyPrice.length > 0}
+										<HistoryPriceChart historyPrice={item.historyPrice} />
+									{:else}
+										<p>Aucune donnée historique disponible</p>
+									{/if}
+								</div>
+							</Popover>
+						</TableBodyCell>
 						<TableBodyCell>
 							<div class="flex">
 								<PriceIcon

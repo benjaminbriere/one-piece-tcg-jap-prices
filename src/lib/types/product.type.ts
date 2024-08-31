@@ -6,6 +6,7 @@ export type Product = {
 	euroTaxPrice: number;
 	previousEuroTaxPrice: number | undefined | null;
 	cardmarketPrice?: number;
+	historyPrice: HistoryPrice[];
 	url: string;
 	link?: string;
 	rarity: string;
@@ -14,6 +15,11 @@ export type Product = {
 	parallel: boolean;
 	local_url?: string;
 };
+
+export type HistoryPrice = {
+	price: number;
+	date: Date;
+}
 
 export type Products = Product[];
 

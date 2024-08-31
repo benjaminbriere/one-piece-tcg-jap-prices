@@ -75,7 +75,7 @@ export async function POST({ request }) {
 			// Vérifier si le code et l'état existent déjà dans la base
 			const { data: existingCard, error: fetchError } = await supabase
 				.from('cards')
-				.select('id, yenPrice, euroPrice, euroTaxPrice, link, local_url')
+				.select('id, yenPrice, euroPrice, euroTaxPrice, link, local_url, historyPrice')
 				.eq('code', card.code)
 				.eq('rarity', card.rarity)
 				.eq('state', card.state)
@@ -123,6 +123,7 @@ export async function POST({ request }) {
 							link: card.link,
 							local_url: localURL,
 							previousEuroTaxPrice: existingCard.euroTaxPrice,
+							historyPrice: [...existingCard.historyPrice, {price: card.euroTaxPrice, date: new Date()}]
 						})
 						.eq('id', existingCard.id); // Mise à jour basée sur l'ID
 
@@ -141,7 +142,7 @@ export async function POST({ request }) {
 				// Si le code et l'état n'existent pas, insérer une nouvelle carte
 				const localURL = await downloadAndSaveImage(card.url, card.code, card.rarity, card.state, card.parallel)
 
-				const { error: insertError } = await supabase.from('cards').insert({...card, local_url: localURL} ).select(); // Sélectionner les données insérées pour confirmation
+				const { error: insertError } = await supabase.from('cards').insert({...card, local_url: localURL, historyPrice: [{price: card.euroTaxPrice, date: new Date()}]} ).select(); // Sélectionner les données insérées pour confirmation
 
 				if (insertError) {
 					console.error('Error inserting data:', insertError.message);
