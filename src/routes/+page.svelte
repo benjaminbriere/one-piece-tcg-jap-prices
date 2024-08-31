@@ -66,7 +66,7 @@
 	let listOP09: Products = [];
 	let listPRB01: Products = [];
 
-	const extensionsList = ['OP09'];
+	const extensionsList = ['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 'PRB01'];
 
 	let configurations: Configurations = [];
 	let activeConfiguration: Configuration | undefined;

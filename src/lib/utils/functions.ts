@@ -7,7 +7,8 @@ import {
 	SITE_OP05,
 	SITE_OP06,
 	SITE_OP07,
-	SITE_OP08, SITE_OP09,
+	SITE_OP08,
+	SITE_OP09,
 	SITE_PRB01
 } from './constants';
 
