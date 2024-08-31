@@ -63,9 +63,10 @@
 	let listOP06: Products = [];
 	let listOP07: Products = [];
 	let listOP08: Products = [];
+	let listOP09: Products = [];
 	let listPRB01: Products = [];
 
-	const extensionsList = ['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08'];
+	const extensionsList = ['OP09'];
 
 	let configurations: Configurations = [];
 	let activeConfiguration: Configuration | undefined;
@@ -82,6 +83,7 @@
 		['OP06', listOP06],
 		['OP07', listOP07],
 		['OP08', listOP08],
+		['OP09', listOP09],
 		['PRB01', listPRB01]
 	]);
 
@@ -159,6 +161,14 @@
 							calculateTotalPrices();
 						}
 						break;
+					case 'OP09':
+						listOP09 = result;
+						if (activeTab === extension) {
+							activeExtensionProducts = listOP09;
+							activeList = result;
+							calculateTotalPrices();
+						}
+						break;
 					case 'PRB01':
 						listPRB01 = result;
 						if (activeTab === extension) {
@@ -207,6 +217,7 @@
 		listOP06 = [];
 		listOP07 = [];
 		listOP08 = [];
+		listOP09 = [];
 		listPRB01 = [];
 
 		for (const extension of extensionsList) {
@@ -289,6 +300,9 @@
 					case 'OP08':
 						listOP08 = [...listOP08, ...arrayResults];
 						break;
+					case 'OP09':
+						listOP09 = [...listOP09, ...arrayResults];
+						break;
 					case 'PRB01':
 						listPRB01 = [...listPRB01, ...arrayResults];
 						break;
@@ -306,6 +320,7 @@
 		extensionsMap.set('OP06', listOP06);
 		extensionsMap.set('OP07', listOP07);
 		extensionsMap.set('OP08', listOP08);
+		extensionsMap.set('OP09', listOP09);
 		extensionsMap.set('PRB01', listPRB01);
 	}
 
@@ -378,6 +393,10 @@
 			case 'OP08':
 				activeList = listOP08;
 				activeExtensionProducts = filterResult(listOP08);
+				break;
+			case 'OP09':
+				activeList = listOP09;
+				activeExtensionProducts = filterResult(listOP09);
 				break;
 			case 'PRB01':
 				activeList = listPRB01;
@@ -540,6 +559,7 @@
 			...filterResult(listOP06, "OP06"),
 			...filterResult(listOP07, "OP07"),
 			...filterResult(listOP08, "OP08"),
+			...filterResult(listOP08, "OP09"),
 			...filterResult(listPRB01, "PRB01"),
 		];
 		const csv = convertToCSV(allCards);
@@ -582,6 +602,7 @@
 		<TabItem title="OP06" on:click={() => setActiveTab('OP06')} />
 		<TabItem title="OP07" on:click={() => setActiveTab('OP07')} />
 		<TabItem title="OP08" on:click={() => setActiveTab('OP08')} />
+		<TabItem title="OP09" on:click={() => setActiveTab('OP09')} />
 		<TabItem title="PRB01" on:click={() => setActiveTab('PRB01')} />
 	</Tabs>
 

@@ -7,7 +7,7 @@ import {
 	SITE_OP05,
 	SITE_OP06,
 	SITE_OP07,
-	SITE_OP08,
+	SITE_OP08, SITE_OP09,
 	SITE_PRB01
 } from './constants';
 
@@ -90,6 +90,8 @@ export function webURL(value: string) {
 			return SITE_OP07;
 		case 'OP08':
 			return SITE_OP08;
+		case 'OP09':
+			return SITE_OP09;
 		case 'PRB01':
 			return SITE_PRB01;
 		default:
@@ -115,6 +117,8 @@ export function convertExtensionToConfigurationKey(value: string): keyof Configu
 			return 'op07';
 		case 'OP08':
 			return 'op08';
+		case 'OP09':
+			return 'op09';
 		case 'PRB01':
 			return 'prb01';
 		default:
