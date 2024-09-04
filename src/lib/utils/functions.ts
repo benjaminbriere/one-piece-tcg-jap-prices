@@ -19,7 +19,7 @@ export function extractRarity(str: string) {
 	if (str.includes('SP')) {
 		return 'SP';
 	}
-	if (str.includes('手配書')){
+	if (str.includes('手配書')) {
 		return 'SP';
 	}
 	if (str.includes('漫画背景')) {
@@ -161,8 +161,8 @@ export function convertToCSV(objArray: string | object) {
 
 	// Créer une chaîne de texte avec les en-têtes et les données
 	// @ts-expect-error type
-	const csvRows = array.map(obj =>
-		headers.map(header => JSON.stringify(obj[header], replacer)).join(',')
+	const csvRows = array.map((obj) =>
+		headers.map((header) => JSON.stringify(obj[header], replacer)).join(',')
 	);
 
 	// Ajouter les en-têtes au début

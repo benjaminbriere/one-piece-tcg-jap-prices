@@ -13,7 +13,11 @@ export async function GET({ url }) {
 		}
 
 		// Requête pour récupérer les cartes pour une extension particulière
-		const { data, error } = await supabase.from('cards').select('*').eq('extension', extension).order("code");
+		const { data, error } = await supabase
+			.from('cards')
+			.select('*')
+			.eq('extension', extension)
+			.order('code');
 
 		if (error) {
 			console.error('Error fetching data from Supabase:', error.message);

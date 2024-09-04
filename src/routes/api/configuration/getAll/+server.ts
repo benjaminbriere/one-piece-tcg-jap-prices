@@ -2,7 +2,7 @@ import { supabase } from '$lib/supabaseClient';
 
 export async function GET() {
 	try {
-		const { data, error } = await supabase.from('configurations').select('*').order("name");
+		const { data, error } = await supabase.from('configurations').select('*').order('name');
 
 		if (error) {
 			console.error('Error fetching data from Supabase:', error.message);

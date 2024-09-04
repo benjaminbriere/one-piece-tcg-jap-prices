@@ -13,20 +13,22 @@
 
 	onMount(() => {
 		if (historyPrice.length > 0) {
-			const labels = historyPrice.map(item => new Date(item.date).toLocaleDateString());
-			const data = historyPrice.map(item => item.price);
+			const labels = historyPrice.map((item) => new Date(item.date).toLocaleDateString());
+			const data = historyPrice.map((item) => item.price);
 
 			new Chart(canvas, {
 				type: 'line',
 				data: {
 					labels,
-					datasets: [{
-						label: 'Historique des prix',
-						data,
-						borderColor: 'rgb(75, 192, 192)',
-						fill: false,
-						tension: 0.1
-					}]
+					datasets: [
+						{
+							label: 'Historique des prix',
+							data,
+							borderColor: 'rgb(75, 192, 192)',
+							fill: false,
+							tension: 0.1
+						}
+					]
 				},
 				options: {
 					scales: {
@@ -53,9 +55,9 @@
 <canvas bind:this={canvas} width="400" height="200"></canvas>
 
 <style>
-    canvas {
-        max-width: 100%;
-				background-color: white;
-        height: auto;
-    }
+	canvas {
+		max-width: 100%;
+		background-color: white;
+		height: auto;
+	}
 </style>

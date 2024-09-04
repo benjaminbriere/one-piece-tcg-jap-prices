@@ -21,11 +21,13 @@
 	} from 'flowbite-svelte';
 	import { TAX_PRICE } from '$lib/utils/constants';
 	import {
-		convertExtensionToConfigurationKey, convertToCSV,
+		convertExtensionToConfigurationKey,
+		convertToCSV,
 		extractCode,
 		extractImageInfo,
 		extractRarity,
-		extractState, generateKey,
+		extractState,
+		generateKey,
 		isCardMissing,
 		webURL
 	} from '$lib/utils/functions';
@@ -49,7 +51,7 @@
 	let openPriceHistoryModal = false;
 
 	// Toaster
-	let toasts: { message: string, type: string }[] = [];
+	let toasts: { message: string; type: string }[] = [];
 
 	let showOnlyMissingCards = true;
 	let showSP = true;
@@ -70,7 +72,18 @@
 	let listOP09: Products = [];
 	let listPRB01: Products = [];
 
-	const extensionsList = ['OP01', 'OP02', 'OP03', 'OP04', 'OP05', 'OP06', 'OP07', 'OP08', 'OP09', 'PRB01'];
+	const extensionsList = [
+		'OP01',
+		'OP02',
+		'OP03',
+		'OP04',
+		'OP05',
+		'OP06',
+		'OP07',
+		'OP08',
+		'OP09',
+		'PRB01'
+	];
 
 	let configurations: Configurations = [];
 	let activeConfiguration: Configuration | undefined;
@@ -239,11 +252,10 @@
 								convert: (x: string) => x.replace(regex, '')
 							},
 							yenPrice: '.selling_price > .figure',
-							link:
-								{
-									selector: '.item_data_link',
-									attr: 'href'
-								},
+							link: {
+								selector: '.item_data_link',
+								attr: 'href'
+							},
 							url: {
 								selector: '.global_photo',
 								how: 'html'
@@ -256,7 +268,8 @@
 				const res: Products = data.products;
 
 				const formattedResults = res.map((product: Product) => {
-					const yenPrice = Number(String(product.yenPrice).replace(yenRegex, '').replace(',', '')) * 1.05;
+					const yenPrice =
+						Number(String(product.yenPrice).replace(yenRegex, '').replace(',', '')) * 1.05;
 					const euroPrice = Math.floor(yenPrice * yenPriceInEuro * 100) / 100;
 					const euroTaxPrice = Math.floor((euroPrice + euroPrice * TAX_PRICE) * 100) / 100;
 
@@ -276,8 +289,9 @@
 					};
 				});
 
-				const arrayResults: Product[] = formattedResults
-					.sort((a, b) => a.code.localeCompare(b.code));
+				const arrayResults: Product[] = formattedResults.sort((a, b) =>
+					a.code.localeCompare(b.code)
+				);
 
 				switch (extension) {
 					case 'OP01':
@@ -352,10 +366,14 @@
 			if (activeConfiguration) {
 				const key = convertExtensionToConfigurationKey(configuration ?? activeTab);
 				if (Array.isArray(activeConfiguration[key])) {
-					const missingCardsOfActiveExtension: ConfigurationExtension[] = activeConfiguration[key] as ConfigurationExtension[];
+					const missingCardsOfActiveExtension: ConfigurationExtension[] = activeConfiguration[
+						key
+					] as ConfigurationExtension[];
 
 					filteredList = filteredList.filter((p) =>
-						missingCardsOfActiveExtension.some(m => m.name === p.code && m.parallel === p.parallel && m.rarity === p.rarity)
+						missingCardsOfActiveExtension.some(
+							(m) => m.name === p.code && m.parallel === p.parallel && m.rarity === p.rarity
+						)
 					);
 				}
 			}
@@ -463,7 +481,6 @@
 	}
 
 	async function addCards() {
-
 		yenPriceInEuro = await (await fetch('api/utils/yenRate')).json();
 
 		await searchProducts();
@@ -485,7 +502,10 @@
 				} else {
 					const error = await response.json();
 					console.error('Error adding data:', error.message);
-					toasts = [...toasts, { message: `Erreur dans l'import des prix de ${key}`, type: 'error' }];
+					toasts = [
+						...toasts,
+						{ message: `Erreur dans l'import des prix de ${key}`, type: 'error' }
+					];
 				}
 			} catch (err) {
 				console.error('Fetch error:', err);
@@ -495,7 +515,12 @@
 		loadData();
 	}
 
-	function handleMissingCardCheckboxChange(event: Event, code: string, parallel: boolean, rarity: string) {
+	function handleMissingCardCheckboxChange(
+		event: Event,
+		code: string,
+		parallel: boolean,
+		rarity: string
+	) {
 		const target = event.target as HTMLInputElement;
 		const value = target.checked;
 
@@ -538,14 +563,20 @@
 
 			if (response.ok) {
 				const data = await response.json();
-				toasts = [...toasts, { message: `Sélection de ${activeConfiguration?.name} mise à jour`, type: 'success' }];
+				toasts = [
+					...toasts,
+					{ message: `Sélection de ${activeConfiguration?.name} mise à jour`, type: 'success' }
+				];
 				console.debug('Data added:', data);
 			} else {
 				const error = await response.json();
-				toasts = [...toasts, {
-					message: `Erreur dans mise à jour de la sélection de ${activeConfiguration?.name}`,
-					type: 'success'
-				}];
+				toasts = [
+					...toasts,
+					{
+						message: `Erreur dans mise à jour de la sélection de ${activeConfiguration?.name}`,
+						type: 'success'
+					}
+				];
 				console.error('Error adding data:', error.message);
 			}
 		} catch (err) {
@@ -576,7 +607,6 @@
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
-
 	}
 
 	function removeToast(index: number) {
@@ -629,7 +659,11 @@
 		>
 			Cartes manquantes
 		</Checkbox>
-		<Checkbox checked={showOnlyParallel} on:click={() => setShowOnlyParallel(!showOnlyParallel)} class="text-color-100">
+		<Checkbox
+			checked={showOnlyParallel}
+			on:click={() => setShowOnlyParallel(!showOnlyParallel)}
+			class="text-color-100"
+		>
 			AA uniquement
 		</Checkbox>
 		<Checkbox checked={showSP} on:click={() => setShowSp(!showSP)} class="text-color-100">
@@ -641,7 +675,11 @@
 		<Checkbox checked={showPSA10} on:click={() => setShowPSA10(!showPSA10)} class="text-color-100">
 			PSA 10
 		</Checkbox>
-		<Checkbox checked={showOnlyMint} on:click={() => setShowOnlyMint(!showOnlyMint)} class="text-color-100">
+		<Checkbox
+			checked={showOnlyMint}
+			on:click={() => setShowOnlyMint(!showOnlyMint)}
+			class="text-color-100"
+		>
 			Mint uniquement
 		</Checkbox>
 		<Button on:click={() => addCards()}>Mettre à jour les prix</Button>
@@ -702,24 +740,19 @@
 						<TableBodyCell>
 							<Checkbox
 								checked={isCardMissing(
-                convertExtensionToConfigurationKey(activeTab),
-                item.code,
-                item.parallel,
-                item.rarity,
-                activeConfiguration
-              )}
+									convertExtensionToConfigurationKey(activeTab),
+									item.code,
+									item.parallel,
+									item.rarity,
+									activeConfiguration
+								)}
 								on:change={(event) =>
-                handleMissingCardCheckboxChange(
-                  event,
-                  item.code,
-                  item.parallel,
-                  item.rarity,
-                )}
+									handleMissingCardCheckboxChange(event, item.code, item.parallel, item.rarity)}
 							/>
 						</TableBodyCell>
 						<TableBodyCell><img src={`images/${item.local_url}`} alt={item.name} /></TableBodyCell>
 						<TableBodyCell>
-							<a href="{item.link}" target="_blank" class="text-primary-600 underline">{item.code}</a>
+							<a href={item.link} target="_blank" class="text-primary-600 underline">{item.code}</a>
 						</TableBodyCell>
 						<TableBodyCell>{item.rarity}</TableBodyCell>
 						<TableBodyCell>{item.state}</TableBodyCell>
@@ -737,14 +770,18 @@
 									/>
 								</span>
 								<span
-									class={`pl-1 pt-1 ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-red-500" : "text-green-500"}`}>
-                {item.euroTaxPrice} €
-              </span>
+									class={`pl-1 pt-1 ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? 'text-red-500' : 'text-green-500'}`}
+								>
+									{item.euroTaxPrice} €
+								</span>
 							</div>
 						</TableBodyCell>
 						<TableBodyCell>
 							<p
-								class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-green-500" : "text-red-500"}>
+								class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice
+									? 'text-green-500'
+									: 'text-red-500'}
+							>
 								{item.cardmarketPrice ? `${item.cardmarketPrice}€` : '-'}
 							</p>
 						</TableBodyCell>
@@ -766,42 +803,41 @@
 
 	<div class="flex flex-wrap xl:hidden">
 		{#each activeExtensionProducts as item}
-			<div class="m-auto w-1/2 sm:w-1/3 lg:w-1/4 p-2">
+			<div class="m-auto w-1/2 p-2 sm:w-1/3 lg:w-1/4">
 				<Card img={`images/${item.local_url}`}>
 					<div class="flex justify-between">
-						<h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white"><a href="{item.link}"
-																																															 target="_blank"
-																																															 class="text-primary-600 underline">{item.code}</a>
-
+						<h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+							<a href={item.link} target="_blank" class="text-primary-600 underline">{item.code}</a>
 						</h5>
 						<Checkbox
 							checked={isCardMissing(
-									convertExtensionToConfigurationKey(activeTab),
-									item.code,
-									item.parallel,
-									item.rarity,
-									activeConfiguration
-								)}
+								convertExtensionToConfigurationKey(activeTab),
+								item.code,
+								item.parallel,
+								item.rarity,
+								activeConfiguration
+							)}
 							on:change={(event) =>
-									handleMissingCardCheckboxChange(
-										event,
-										item.code,
-										item.parallel,
-										item.rarity,
-									)}
+								handleMissingCardCheckboxChange(event, item.code, item.parallel, item.rarity)}
 						/>
 					</div>
 					<div class="flex justify-between">
 						<div>
 							<p class="text-sm text-gray-900 dark:text-white">Cardrush</p>
 							<p
-								class={`text-md font-bold ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-red-500" : "text-green-500"}`}>{item.euroTaxPrice}
-								€</p>
+								class={`text-md font-bold ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? 'text-red-500' : 'text-green-500'}`}
+							>
+								{item.euroTaxPrice}
+								€
+							</p>
 						</div>
 						<div>
 							<p class="text-sm text-gray-900 dark:text-white">Cardmarket</p>
 							<p
-								class={`text-md font-bold ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-green-500" : "text-red-500"}`}>{item.cardmarketPrice ? `${item.cardmarketPrice} €` : '-'}</p>
+								class={`text-md font-bold ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? 'text-green-500' : 'text-red-500'}`}
+							>
+								{item.cardmarketPrice ? `${item.cardmarketPrice} €` : '-'}
+							</p>
 						</div>
 					</div>
 				</Card>
@@ -809,17 +845,16 @@
 		{/each}
 	</div>
 
-
 	<div class="toast-container">
 		{#each toasts as toast, index}
-			<Toast on:hide={() => removeToast(index)} color={toast.type === "success" ? "green" : "red"}>
+			<Toast on:hide={() => removeToast(index)} color={toast.type === 'success' ? 'green' : 'red'}>
 				<svelte:fragment slot="icon">
-					{#if toast.type === "success" }
-						<CheckCircleSolid class="w-5 h-5" />
+					{#if toast.type === 'success'}
+						<CheckCircleSolid class="h-5 w-5" />
 						<span class="sr-only">Check icon</span>
 					{/if}
-					{#if toast.type === "error" }
-						<CloseCircleSolid class="w-5 h-5" />
+					{#if toast.type === 'error'}
+						<CloseCircleSolid class="h-5 w-5" />
 						<span class="sr-only">Error icon</span>
 					{/if}
 				</svelte:fragment>
@@ -827,23 +862,21 @@
 			</Toast>
 		{/each}
 	</div>
-
 </main>
 
 <style>
-    main {
-        width: 100%;
-        min-height: 100vh;
-    }
+	main {
+		width: 100%;
+		min-height: 100vh;
+	}
 
-    .toast-container {
-        position: fixed;
-        top: 20px; /* Position de départ */
-        right: 20px;
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        gap: 10px; /* Espace entre les toasts */
-    }
-
+	.toast-container {
+		position: fixed;
+		top: 20px; /* Position de départ */
+		right: 20px;
+		z-index: 9999;
+		display: flex;
+		flex-direction: column;
+		gap: 10px; /* Espace entre les toasts */
+	}
 </style>

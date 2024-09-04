@@ -19,7 +19,7 @@ export type Product = {
 export type HistoryPrice = {
 	price: number;
 	date: Date;
-}
+};
 
 export type Products = Product[];
 

@@ -18,10 +18,9 @@ export type Configuration = {
 };
 
 export type ConfigurationExtension = {
-	name: string
-	parallel: boolean
-	rarity: string
-}
+	name: string;
+	parallel: boolean;
+	rarity: string;
+};
 
 export type Configurations = Configuration[];
-
