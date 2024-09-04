@@ -550,18 +550,18 @@
 		}
 	}
 
-	function exportConfiguration(){
+	function exportConfiguration() {
 		const allCards = [
-			...filterResult(listOP01, "OP01"),
-			...filterResult(listOP02, "OP02"),
-			...filterResult(listOP03, "OP03"),
-			...filterResult(listOP04, "OP04"),
-			...filterResult(listOP05, "OP05"),
-			...filterResult(listOP06, "OP06"),
-			...filterResult(listOP07, "OP07"),
-			...filterResult(listOP08, "OP08"),
-			...filterResult(listOP08, "OP09"),
-			...filterResult(listPRB01, "PRB01"),
+			...filterResult(listOP01, 'OP01'),
+			...filterResult(listOP02, 'OP02'),
+			...filterResult(listOP03, 'OP03'),
+			...filterResult(listOP04, 'OP04'),
+			...filterResult(listOP05, 'OP05'),
+			...filterResult(listOP06, 'OP06'),
+			...filterResult(listOP07, 'OP07'),
+			...filterResult(listOP08, 'OP08'),
+			...filterResult(listOP08, 'OP09'),
+			...filterResult(listPRB01, 'PRB01')
 		];
 		const csv = convertToCSV(allCards);
 		const blob = new Blob([csv], { type: 'text/csv' });
@@ -718,31 +718,37 @@
 						<TableBodyCell>{item.yenPrice}</TableBodyCell>
 						<TableBodyCell>{item.euroPrice}€</TableBodyCell>
 						<TableBodyCell>
-							<div id={`history_price_${item.code.replace('[', '_').replace(']','_')}_${item.rarity}_${item.state}`}>{item?.previousEuroTaxPrice ? `${item?.previousEuroTaxPrice}€` : '-'}</div>
-							<Popover triggeredBy={`#history_price_${item.code.replace('[', '_').replace(']','_')}_${item.rarity}_${item.state}`} placement="top">
-								<div class="min-w-80">
-									{#if item.historyPrice && item.historyPrice.length > 0}
-										<HistoryPriceChart historyPrice={item.historyPrice} />
-									{:else}
-										<p>Aucune donnée historique disponible</p>
-									{/if}
-								</div>
-							</Popover>
+							{item?.previousEuroTaxPrice ? `${item?.previousEuroTaxPrice}€` : '-'}
 						</TableBodyCell>
 						<TableBodyCell>
 							<div class="flex">
-								<PriceIcon
-									euroTaxPrice={item.euroTaxPrice}
-									previousTaxPrice={item?.previousEuroTaxPrice}
-								/>
+								<span id={`history_price_${item.code.replace('[', '_').replace(']','_')}_${item.rarity}_${item.state}`}>
+									<PriceIcon
+										euroTaxPrice={item.euroTaxPrice}
+										previousTaxPrice={item?.previousEuroTaxPrice}
+									/>
+								</span>
 								<span
 									class={`pl-1 pt-1 ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-red-500" : "text-green-500"}`}>
                 {item.euroTaxPrice} €
               </span>
+								<Popover
+									placement="left"
+									trigger="click"
+									triggeredBy={`#history_price_${item.code.replace('[', '_').replace(']','_')}_${item.rarity}_${item.state}`}>
+									<div class="min-w-80">
+										{#if item.historyPrice && item.historyPrice.length > 0}
+											<HistoryPriceChart historyPrice={item.historyPrice} />
+										{:else}
+											<p>Aucune donnée historique disponible</p>
+										{/if}
+									</div>
+								</Popover>
 							</div>
 						</TableBodyCell>
 						<TableBodyCell>
-							<p class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-green-500" : "text-red-500"}>
+							<p
+								class={item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-green-500" : "text-red-500"}>
 								{item.cardmarketPrice ? `${item.cardmarketPrice}€` : '-'}
 							</p>
 						</TableBodyCell>

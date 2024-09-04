@@ -19,6 +19,9 @@ export function extractRarity(str: string) {
 	if (str.includes('SP')) {
 		return 'SP';
 	}
+	if (str.includes('手配書')){
+		return 'SP';
+	}
 	if (str.includes('漫画背景')) {
 		return 'MANGA';
 	}
