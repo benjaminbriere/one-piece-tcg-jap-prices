@@ -1,12 +1,13 @@
 <script lang="ts">
 	import Header from '../components/Header.svelte';
 	import scrapeIt from 'scrape-it';
-	import type { Product, Products, TotatPrices } from '$lib/types/product.type';
+	import type { HistoryPrice, Product, Products, TotatPrices } from '$lib/types/product.type';
 	import {
 		Button,
 		Card,
 		Checkbox,
-		Label, Popover,
+		Label,
+		Modal,
 		Select,
 		TabItem,
 		Table,
@@ -44,6 +45,8 @@
 		yenTotal: 0
 	};
 	let yenPriceInEuro = 0;
+	let activeCardPriceHistory: HistoryPrice[] = [];
+	let openPriceHistoryModal = false;
 
 	// Toaster
 	let toasts: { message: string, type: string }[] = [];
@@ -580,6 +583,11 @@
 		toasts = toasts.filter((_, i) => i !== index);
 	}
 
+	function handlePriceHistoryModal(history: HistoryPrice[]) {
+		activeCardPriceHistory = history;
+		openPriceHistoryModal = true;
+	}
+
 	onMount(async () => {
 		await loadConfiguration();
 		await loadData();
@@ -722,7 +730,7 @@
 						</TableBodyCell>
 						<TableBodyCell>
 							<div class="flex">
-								<span id={`history_price_${item.code.replace('[', '_').replace(']','_')}_${item.rarity}_${item.state}`}>
+								<span on:click={() => handlePriceHistoryModal(item.historyPrice)}>
 									<PriceIcon
 										euroTaxPrice={item.euroTaxPrice}
 										previousTaxPrice={item?.previousEuroTaxPrice}
@@ -732,18 +740,6 @@
 									class={`pl-1 pt-1 ${item.cardmarketPrice && item.cardmarketPrice < item.euroTaxPrice ? "text-red-500" : "text-green-500"}`}>
                 {item.euroTaxPrice} €
               </span>
-								<Popover
-									placement="left"
-									trigger="click"
-									triggeredBy={`#history_price_${item.code.replace('[', '_').replace(']','_')}_${item.rarity}_${item.state}`}>
-									<div class="min-w-80">
-										{#if item.historyPrice && item.historyPrice.length > 0}
-											<HistoryPriceChart historyPrice={item.historyPrice} />
-										{:else}
-											<p>Aucune donnée historique disponible</p>
-										{/if}
-									</div>
-								</Popover>
 							</div>
 						</TableBodyCell>
 						<TableBodyCell>
@@ -757,6 +753,16 @@
 			{/if}
 		</TableBody>
 	</Table>
+
+	<Modal title="Evolution des prix" bind:open={openPriceHistoryModal} autoclose outsideclose>
+		<div class="min-w-80">
+			{#if activeCardPriceHistory && activeCardPriceHistory.length > 0}
+				<HistoryPriceChart historyPrice={activeCardPriceHistory} />
+			{:else}
+				<p>Aucune donnée historique disponible</p>
+			{/if}
+		</div>
+	</Modal>
 
 	<div class="flex flex-wrap xl:hidden">
 		{#each activeExtensionProducts as item}

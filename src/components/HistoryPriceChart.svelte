@@ -39,7 +39,7 @@
 						y: {
 							title: {
 								display: true,
-								text: 'Price (€)'
+								text: 'Prix TTC (€)'
 							},
 							beginAtZero: false
 						}
