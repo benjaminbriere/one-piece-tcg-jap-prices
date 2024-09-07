@@ -368,7 +368,7 @@
 				if (Array.isArray(activeConfiguration[key])) {
 					const missingCardsOfActiveExtension: ConfigurationExtension[] = activeConfiguration[
 						key
-					] as ConfigurationExtension[];
+						] as ConfigurationExtension[];
 
 					filteredList = filteredList.filter((p) =>
 						missingCardsOfActiveExtension.some(
@@ -821,6 +821,14 @@
 								handleMissingCardCheckboxChange(event, item.code, item.parallel, item.rarity)}
 						/>
 					</div>
+					<div>
+														<span on:click={() => handlePriceHistoryModal(item.historyPrice)}>
+									<PriceIcon
+										euroTaxPrice={item.euroTaxPrice}
+										previousTaxPrice={item?.previousEuroTaxPrice}
+									/>
+								</span>
+					</div>
 					<div class="flex justify-between">
 						<div>
 							<p class="text-sm text-gray-900 dark:text-white">Cardrush</p>
@@ -865,18 +873,18 @@
 </main>
 
 <style>
-	main {
-		width: 100%;
-		min-height: 100vh;
-	}
+    main {
+        width: 100%;
+        min-height: 100vh;
+    }
 
-	.toast-container {
-		position: fixed;
-		top: 20px; /* Position de départ */
-		right: 20px;
-		z-index: 9999;
-		display: flex;
-		flex-direction: column;
-		gap: 10px; /* Espace entre les toasts */
-	}
+    .toast-container {
+        position: fixed;
+        top: 20px; /* Position de départ */
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Espace entre les toasts */
+    }
 </style>
