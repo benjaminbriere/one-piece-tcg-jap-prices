@@ -34,7 +34,7 @@ export async function POST({ request }) {
 			fs.mkdirSync(imagesDir);
 		}
 
-		const filename = `${code}${parallel ? `_aa` : ''}${rarity === 'MANGA' ? `_manga` : ''}${state === 'PSA10' ? `_psa` : ''}.png`; // Récupère le nom de fichier depuis l'URL
+		const filename = `${code}${parallel ? `_aa` : ''}${rarity === 'MANGA' ? `_manga` : ''}${rarity === 'SP' ? `_SP` : ''}${state === 'PSA10' ? `_psa` : ''}.png`; // Récupère le nom de fichier depuis l'URL
 		const filepath = path.join(imagesDir, filename);
 
 		if (fs.existsSync(filepath)) {
