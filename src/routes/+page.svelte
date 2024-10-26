@@ -285,7 +285,8 @@
 						state: extractState(product.name),
 						parallel: product.name.includes('パラレル'),
 						previousEuroTaxPrice: undefined,
-						extension: extension
+						extension: extension,
+						historyPrice: []
 					};
 				});
 
@@ -822,7 +823,7 @@
 						/>
 					</div>
 					<div>
-														<span on:click={() => handlePriceHistoryModal(item.historyPrice)}>
+								<span on:click={() => handlePriceHistoryModal(item.historyPrice)}>
 									<PriceIcon
 										euroTaxPrice={item.euroTaxPrice}
 										previousTaxPrice={item?.previousEuroTaxPrice}
