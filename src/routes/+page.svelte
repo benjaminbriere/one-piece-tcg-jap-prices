@@ -70,6 +70,7 @@
 	let listOP07: Products = [];
 	let listOP08: Products = [];
 	let listOP09: Products = [];
+	let listOP10: Products = [];
 	let listPRB01: Products = [];
 
 	const extensionsList = [
@@ -82,6 +83,7 @@
 		'OP07',
 		'OP08',
 		'OP09',
+		'OP10',
 		'PRB01'
 	];
 
@@ -101,6 +103,7 @@
 		['OP07', listOP07],
 		['OP08', listOP08],
 		['OP09', listOP09],
+		['OP10', listOP10],
 		['PRB01', listPRB01]
 	]);
 
@@ -186,6 +189,14 @@
 							calculateTotalPrices();
 						}
 						break;
+					case 'OP10':
+						listOP10 = result;
+						if (activeTab === extension) {
+							activeExtensionProducts = listOP10;
+							activeList = result;
+							calculateTotalPrices();
+						}
+						break;
 					case 'PRB01':
 						listPRB01 = result;
 						if (activeTab === extension) {
@@ -234,7 +245,7 @@
 		listOP06 = [];
 		listOP07 = [];
 		listOP08 = [];
-		listOP09 = [];
+		listOP10 = [];;
 		listPRB01 = [];
 
 		for (const extension of extensionsList) {
@@ -322,6 +333,9 @@
 					case 'OP09':
 						listOP09 = [...listOP09, ...arrayResults];
 						break;
+					case 'OP10':
+						listOP10 = [...listOP10, ...arrayResults];
+						break;
 					case 'PRB01':
 						listPRB01 = [...listPRB01, ...arrayResults];
 						break;
@@ -340,6 +354,7 @@
 		extensionsMap.set('OP07', listOP07);
 		extensionsMap.set('OP08', listOP08);
 		extensionsMap.set('OP09', listOP09);
+		extensionsMap.set('OP10', listOP10);
 		extensionsMap.set('PRB01', listPRB01);
 	}
 
@@ -420,6 +435,10 @@
 			case 'OP09':
 				activeList = listOP09;
 				activeExtensionProducts = filterResult(listOP09);
+				break;
+			case 'OP10':
+				activeList = listOP10;
+				activeExtensionProducts = filterResult(listOP10);
 				break;
 			case 'PRB01':
 				activeList = listPRB01;
@@ -595,7 +614,8 @@
 			...filterResult(listOP06, 'OP06'),
 			...filterResult(listOP07, 'OP07'),
 			...filterResult(listOP08, 'OP08'),
-			...filterResult(listOP08, 'OP09'),
+			...filterResult(listOP09, 'OP09'),
+			...filterResult(listOP10, 'OP10'),
 			...filterResult(listPRB01, 'PRB01')
 		];
 		const csv = convertToCSV(allCards);
@@ -643,6 +663,7 @@
 		<TabItem title="OP07" on:click={() => setActiveTab('OP07')} />
 		<TabItem title="OP08" on:click={() => setActiveTab('OP08')} />
 		<TabItem title="OP09" on:click={() => setActiveTab('OP09')} />
+		<TabItem title="OP10" on:click={() => setActiveTab('OP10')} />
 		<TabItem title="PRB01" on:click={() => setActiveTab('PRB01')} />
 	</Tabs>
 

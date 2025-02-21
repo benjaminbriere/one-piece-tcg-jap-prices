@@ -14,6 +14,7 @@ export type Configuration = {
 	op07: ConfigurationExtension[];
 	op08: ConfigurationExtension[];
 	op09: ConfigurationExtension[];
+	op10: ConfigurationExtension[];
 	prb01: ConfigurationExtension[];
 };
 
