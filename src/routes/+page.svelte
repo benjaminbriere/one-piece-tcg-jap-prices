@@ -71,6 +71,7 @@
 	let listOP08: Products = [];
 	let listOP09: Products = [];
 	let listOP10: Products = [];
+	let listOP11: Products = [];
 	let listPRB01: Products = [];
 
 	const extensionsList = [
@@ -84,6 +85,7 @@
 		'OP08',
 		'OP09',
 		'OP10',
+		'OP11',
 		'PRB01'
 	];
 
@@ -104,6 +106,7 @@
 		['OP08', listOP08],
 		['OP09', listOP09],
 		['OP10', listOP10],
+		['OP11', listOP11],
 		['PRB01', listPRB01]
 	]);
 
@@ -193,6 +196,14 @@
 						listOP10 = result;
 						if (activeTab === extension) {
 							activeExtensionProducts = listOP10;
+							activeList = result;
+							calculateTotalPrices();
+						}
+						break;
+					case 'OP11':
+						listOP11 = result;
+						if (activeTab === extension) {
+							activeExtensionProducts = listOP11;
 							activeList = result;
 							calculateTotalPrices();
 						}
@@ -336,6 +347,9 @@
 					case 'OP10':
 						listOP10 = [...listOP10, ...arrayResults];
 						break;
+					case 'OP11':
+						listOP11 = [...listOP11, ...arrayResults];
+						break;
 					case 'PRB01':
 						listPRB01 = [...listPRB01, ...arrayResults];
 						break;
@@ -355,6 +369,7 @@
 		extensionsMap.set('OP08', listOP08);
 		extensionsMap.set('OP09', listOP09);
 		extensionsMap.set('OP10', listOP10);
+		extensionsMap.set('OP11', listOP11);
 		extensionsMap.set('PRB01', listPRB01);
 	}
 
@@ -439,6 +454,10 @@
 			case 'OP10':
 				activeList = listOP10;
 				activeExtensionProducts = filterResult(listOP10);
+				break;
+			case 'OP11':
+				activeList = listOP11;
+				activeExtensionProducts = filterResult(listOP11);
 				break;
 			case 'PRB01':
 				activeList = listPRB01;
@@ -616,6 +635,7 @@
 			...filterResult(listOP08, 'OP08'),
 			...filterResult(listOP09, 'OP09'),
 			...filterResult(listOP10, 'OP10'),
+			...filterResult(listOP11, 'OP11'),
 			...filterResult(listPRB01, 'PRB01')
 		];
 		const csv = convertToCSV(allCards);
@@ -664,6 +684,7 @@
 		<TabItem title="OP08" on:click={() => setActiveTab('OP08')} />
 		<TabItem title="OP09" on:click={() => setActiveTab('OP09')} />
 		<TabItem title="OP10" on:click={() => setActiveTab('OP10')} />
+		<TabItem title="OP11" on:click={() => setActiveTab('OP11')} />
 		<TabItem title="PRB01" on:click={() => setActiveTab('PRB01')} />
 	</Tabs>
 

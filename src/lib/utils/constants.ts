@@ -20,5 +20,7 @@ export const SITE_OP09 =
 	'https://www.cardrush-op.jp/product-group/53?num=100&img=160&sort=price-desc'
 export const SITE_OP10 =
 	'https://www.cardrush-op.jp/product-group/54?num=100&img=160&sort=price-desc';
+export const SITE_OP11 =
+	'https://www.cardrush-op.jp/product-group/89?num=100&img=160&sort=price-desc';
 export const SITE_PRB01 =
 	'https://www.cardrush-op.jp/product-group/52?num=100&img=160&sort=price-desc';
